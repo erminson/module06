@@ -1,5 +1,7 @@
 package ru.erminson.lc.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.Topic;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
@@ -9,9 +11,11 @@ import ru.erminson.lc.service.CourseService;
 import java.util.Collections;
 import java.util.List;
 
+@Service
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
 
+    @Autowired
     public CourseServiceImpl(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }

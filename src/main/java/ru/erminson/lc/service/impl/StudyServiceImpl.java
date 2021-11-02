@@ -1,6 +1,8 @@
 package ru.erminson.lc.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.dto.report.StudentReport;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.RecordBook;
@@ -25,6 +27,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Service
 public class StudyServiceImpl implements StudyService {
     private static final int PASSING_SCORE = 75;
     private static final int MIN_SCORE = 1;
@@ -34,6 +37,7 @@ public class StudyServiceImpl implements StudyService {
     private final RecordBookService recordBookService;
     private final CourseService courseService;
 
+    @Autowired
     public StudyServiceImpl(
             StudentService studentService,
             RecordBookService recordBookService,
