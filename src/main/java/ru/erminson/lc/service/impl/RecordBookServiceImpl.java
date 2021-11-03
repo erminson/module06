@@ -1,5 +1,7 @@
 package ru.erminson.lc.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
@@ -11,9 +13,11 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
+@Service
 public class RecordBookServiceImpl implements RecordBookService {
     private final RecordBookRepository recordBookRepository;
 
+    @Autowired
     public RecordBookServiceImpl(RecordBookRepository recordBookRepository) {
         this.recordBookRepository = recordBookRepository;
     }

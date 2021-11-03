@@ -2,6 +2,7 @@ package ru.erminson.lc.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import ru.erminson.lc.annotation.InjectRandomMark;
 
 import java.time.Duration;
 
@@ -16,5 +17,10 @@ public class TopicScore {
         this.topicTitle = topicTitle;
         this.score = 0;
         this.durationInDays = durationInDays;
+    }
+
+    @InjectRandomMark
+    public void setScore(int score) {
+        this.score = score;
     }
 }
