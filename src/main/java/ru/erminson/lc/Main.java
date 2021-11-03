@@ -5,6 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import ru.erminson.lc.configuration.AppConfig;
 import ru.erminson.lc.model.dto.report.StudentReport;
 import ru.erminson.lc.model.entity.Student;
+import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.service.StudyService;
 import ru.erminson.lc.service.impl.StudyServiceImpl;
 import ru.erminson.lc.view.View;
@@ -16,6 +17,10 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        TopicScore myTopic = context.getBean("myTopic", TopicScore.class);
+        log.info("Topic: {}", myTopic);
+
         View view = new ConsoleView();
 
 //        StudyService studyService = StudyServiceFactory.createStudyService();
