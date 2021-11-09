@@ -3,6 +3,7 @@ package ru.erminson.lc;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.erminson.lc.configuration.AppConfig;
 import ru.erminson.lc.model.dto.report.StudentReport;
@@ -16,6 +17,7 @@ import ru.erminson.lc.view.impl.ConsoleView;
 import java.util.List;
 
 @Slf4j
+@SpringBootApplication
 public class Main implements CommandLineRunner {
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
@@ -30,7 +32,6 @@ public class Main implements CommandLineRunner {
 
         View view = new ConsoleView();
 
-//        StudyService studyService = StudyServiceFactory.createStudyService();
         StudyService studyService = context.getBean("studyServiceImpl", StudyServiceImpl.class);
 
         fakeBusinessActivities(studyService, view);
