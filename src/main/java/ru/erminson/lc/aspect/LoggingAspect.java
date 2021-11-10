@@ -3,17 +3,15 @@ package ru.erminson.lc.aspect;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Component
-@Aspect
+//@Component
+//@Aspect
 @Slf4j
 public class LoggingAspect {
     @Value("logging.package")
@@ -29,7 +27,7 @@ public class LoggingAspect {
     @Pointcut("execution(public Object postProcessAfterInitialization(..))")
     private void postProcessAfterInitializationAdvice() {}
 
-    @Pointcut("allMethods() && !postProcessBeforeInitializationAdvice() && !postProcessAfterInitializationAdvice()")
+    @Pointcut("!postProcessBeforeInitializationAdvice() && !postProcessAfterInitializationAdvice()")
     private void allMethodExcludeBPP() {}
 
 
