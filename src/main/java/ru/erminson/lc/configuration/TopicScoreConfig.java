@@ -1,22 +1,26 @@
 package ru.erminson.lc.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import ru.erminson.lc.model.entity.TopicScore;
 
 import java.time.Duration;
 
-@Configuration
+@ConfigurationProperties(prefix = "topic")
 public class TopicScoreConfig {
-    @Value("${title}")
-    private String topicTitle;
-
-    @Value("${duration}")
+    private String title;
     private int duration;
 
-    @Bean("myTopic")
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    @Bean
     public TopicScore createTopicScore() {
-        return new TopicScore(topicTitle, Duration.ofDays(duration));
+        return new TopicScore(title, Duration.ofDays(duration));
     }
 }
