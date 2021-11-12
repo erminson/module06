@@ -1,17 +1,18 @@
 package ru.erminson.lc.configuration;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import java.util.List;
 
-//@Configuration
-//@ConfigurationProperties(prefix = "logging")
+@ConfigurationProperties(prefix = "logging")
 public class LoggingPackageProperties {
-    private List<String> pointcuts;
+    private List<String> packages;
 
-    public List<String> getPointcuts() {
-        return pointcuts;
+    public List<String> getPackages() {
+        return packages;
     }
 
-    public void setPointcuts(List<String> pointcuts) {
-        this.pointcuts = pointcuts;
+    public void setPackages(List<String> packages) {
+        this.packages = packages;
     }
 }
