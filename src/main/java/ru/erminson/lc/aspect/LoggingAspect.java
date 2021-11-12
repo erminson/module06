@@ -5,7 +5,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,10 +13,6 @@ import java.util.List;
 //@Aspect
 @Slf4j
 public class LoggingAspect {
-    @Value("logging.package")
-    static private String loggingPackage = "ru.erminson.lc..*";
-
-//    @Pointcut("execution(public * ru.erminson.lc..*(..))")
     @Pointcut("within(ru.erminson.lc..*)")
     private void allMethods() {}
 
