@@ -12,10 +12,6 @@ import ru.erminson.lc.utils.StudentRepositoryYamlInitializer;
 
 @Slf4j
 @Configuration
-@ComponentScan("ru.erminson.lc")
-@PropertySource(value = "classpath:application.yaml")
-//@EnableAspectJAutoProxy
-//@Import({TopicScoreConfig.class, AdvisorConfig.class})
 public class AppConfig {
     @Bean
     public CourseRepository createCourseRepository() {
