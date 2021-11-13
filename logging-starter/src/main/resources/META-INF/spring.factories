@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  ru.erminson.logging.configuration.LoggerAutoConfiguration

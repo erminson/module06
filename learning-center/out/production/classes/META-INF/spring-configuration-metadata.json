@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "logging",
+      "type": "ru.erminson.lc.configuration.LoggingPackageProperties",
+      "sourceType": "ru.erminson.lc.configuration.LoggingPackageProperties"
+    },
+    {
+      "name": "topic",
+      "type": "ru.erminson.lc.configuration.TopicScoreConfig",
+      "sourceType": "ru.erminson.lc.configuration.TopicScoreConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "logging.packages",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "ru.erminson.lc.configuration.LoggingPackageProperties"
+    }
+  ],
+  "hints": []
+}
