@@ -45,6 +45,7 @@ local.properties
 .gradletasknamecache
 /build
 /out
+out/
 /intTestHomeDir
 /subprojects/*/out
 /intellij

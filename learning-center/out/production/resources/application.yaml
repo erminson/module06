@@ -1,7 +1,0 @@
-logging:
-  packages:
-      - ru.erminson.lc.repository
-      - ru.erminson.lc.service
-topic:
-  title: TopicTitle2
-  duration: 2
