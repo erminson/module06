@@ -1,8 +1,13 @@
 package ru.erminson.lc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.erminson.lc.configuration.AppConfig;
+import ru.erminson.lc.configuration.TopicScoreConfig;
 import ru.erminson.lc.model.dto.report.StudentReport;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;
@@ -14,16 +19,27 @@ import ru.erminson.lc.view.impl.ConsoleView;
 import java.util.List;
 
 @Slf4j
-public class Main {
+@EnableConfigurationProperties({TopicScoreConfig.class})
+@SpringBootApplication
+public class Main implements CommandLineRunner {
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        SpringApplication.run(Main.class, args);
+    }
 
-        TopicScore myTopic = context.getBean("myTopic", TopicScore.class);
+    private final AnnotationConfigApplicationContext context;
+
+    @Autowired
+    public Main(AnnotationConfigApplicationContext context) {
+        this.context = context;
+    }
+
+    @Override
+    public void run(String... args) {
+        TopicScore myTopic = context.getBean(TopicScore.class);
         log.info("Topic: {}", myTopic);
 
         View view = new ConsoleView();
 
-//        StudyService studyService = StudyServiceFactory.createStudyService();
         StudyService studyService = context.getBean("studyServiceImpl", StudyServiceImpl.class);
 
         fakeBusinessActivities(studyService, view);
@@ -65,11 +81,11 @@ public class Main {
         printLine();
 
         // Save report using single thread
-        Runnable runnable = () -> studyService.saveStudentReports();
+        Runnable runnable = studyService::saveStudentReports;
         measureElapsedTime(runnable);
 
         // Save report using single thread
-        Runnable runnable2 = () -> studyService.saveStudentReportsWithMultithreading();
+        Runnable runnable2 = studyService::saveStudentReportsWithMultithreading;
         measureElapsedTime(runnable2);
     }
 

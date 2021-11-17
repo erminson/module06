@@ -1,3 +1,3 @@
 rootProject.name = 'module06-hw01'
-
-
+include 'learning-center'
+include 'logging-starter'

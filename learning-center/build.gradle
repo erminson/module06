@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'org.springframework.boot' version '2.5.6'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+group 'ru.erminson.lc'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    tomcatWebappPath = "/Users/erminson/apache-tomcat-10.0.11/webapps"
+}
+
+bootWar {
+    archiveName "learning-center.war"
+}
+
+//gradle.projectsEvaluated {
+//    configurations.getByName('runtimeClasspath').files.each { println it }
+//}
+
+task deployTomcat(type: Copy) {
+    from bootWar.archiveFile.get()
+    into tomcatWebappPath
+}
+
+deployTomcat.dependsOn bootWar
+assemble.dependsOn deployTomcat
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    implementation project(':logging-starter')
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+}

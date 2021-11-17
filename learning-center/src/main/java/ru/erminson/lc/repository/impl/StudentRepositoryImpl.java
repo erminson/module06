@@ -3,6 +3,7 @@ package ru.erminson.lc.repository.impl;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
 import ru.erminson.lc.repository.StudentRepository;
+import ru.erminson.logging.annotation.EnableCustomAOP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
+    @EnableCustomAOP
     public boolean addStudent(String name) {
         Student student = new Student(name);
         if (students.contains(student)) {

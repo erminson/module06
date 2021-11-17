@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "logging.enabled",
+      "type": "java.lang.String",
+      "description": "Enables or disables the LoggingStarter completely."
+    },
+    {
+      "name": "logging.packages",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of packages for logging."
+    }
+  ] }

@@ -51,7 +51,7 @@ public class StudentReport {
         return ability;
     }
 
-    public List<ru.erminson.lc.model.dto.report.TopicScoreReport> getTopicScores() {
+    public List<TopicScoreReport> getTopicScores() {
         return topicScores;
     }
 

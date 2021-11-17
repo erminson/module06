@@ -5,31 +5,7 @@ plugins {
 group 'ru.erminson.lc'
 version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
-configurations.all {
-    exclude group: "commons-logging", module: "commons-logging"
-}
-
-dependencies {
-    implementation group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.32'
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.6'
-
-    implementation group: 'org.springframework', name: 'spring-context', version: '5.3.12'
-    implementation group: 'org.springframework', name: 'spring-core', version: '5.3.12'
-    implementation group: 'org.springframework', name: 'spring-beans', version: '5.3.12'
-
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.29'
-
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-}
-
-test {
-    useJUnitPlatform()
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
