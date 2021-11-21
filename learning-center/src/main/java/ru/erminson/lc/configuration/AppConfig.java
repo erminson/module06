@@ -13,7 +13,7 @@ import ru.erminson.lc.utils.StudentRepositoryYamlInitializer;
 @Slf4j
 @Configuration
 public class AppConfig {
-    @Bean
+    @Bean("courseRepositoryYaml")
     public CourseRepository createCourseRepository() {
         return CourseRepositoryYamlInitializer.create();
     }
