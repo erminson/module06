@@ -34,6 +34,9 @@ assemble.dependsOn deployTomcat
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    runtimeOnly 'com.h2database:h2:1.4.200'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
