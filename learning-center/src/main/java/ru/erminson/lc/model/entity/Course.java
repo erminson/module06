@@ -12,4 +12,8 @@ import java.util.List;
 public class Course {
     private String title;
     private List<Topic> topics;
+
+    public void addTopic(Topic topic) {
+        topics.add(topic);
+    }
 }
