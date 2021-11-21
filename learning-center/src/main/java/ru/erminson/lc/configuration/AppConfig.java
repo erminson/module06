@@ -1,6 +1,7 @@
 package ru.erminson.lc.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.erminson.lc.repository.CourseRepository;
@@ -18,13 +19,15 @@ public class AppConfig {
         return CourseRepositoryYamlInitializer.create();
     }
 
-    @Bean
+    @Bean("studentRepositoryYaml")
     public StudentRepository createStudentRepository() {
         return StudentRepositoryYamlInitializer.create();
     }
 
     @Bean
-    public RecordBookRepository createRecordBookRepository(StudentRepository studentRepository) {
+    public RecordBookRepository createRecordBookRepository(
+            @Qualifier("studentRepositoryJdbc") StudentRepository studentRepository
+    ) {
         return RecordBookRepositoryInitializer.create(studentRepository);
     }
 }
