@@ -36,14 +36,14 @@ CREATE TABLE IF NOT EXISTS topic_score
 CREATE TABLE IF NOT EXISTS record_book
 (
     id         IDENTITY NOT NULL PRIMARY KEY,
-    student_id BIGINT REFERENCES student (id),
-    course_id  BIGINT REFERENCES course (id),
+    student_id BIGINT REFERENCES student (id) ON DELETE CASCADE,
+    course_id  BIGINT REFERENCES course (id) ON DELETE SET NULL,
     start_date DATE     NOT NULL DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE IF NOT EXISTS record_book_topic_score
 (
     id             IDENTITY NOT NULL PRIMARY KEY,
-    record_book_id BIGINT REFERENCES record_book (id),
-    topic_score_id BIGINT REFERENCES topic_score (id)
+    record_book_id BIGINT REFERENCES record_book (id) ON DELETE CASCADE,
+    topic_score_id BIGINT REFERENCES topic_score (id) ON DELETE SET NULL
 );
