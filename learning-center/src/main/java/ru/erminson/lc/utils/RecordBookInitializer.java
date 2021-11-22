@@ -53,6 +53,6 @@ public class RecordBookInitializer {
     private static TopicScore createTopic(Topic topic) {
         String topicTitle = topic.getTitle();
         Duration durationInDays = Duration.ofDays((long) Math.ceil(topic.getDurationInHours() / TEACHING_HOURS_PER_DAY));
-        return new TopicScore(topicTitle, durationInDays);
+        return new TopicScore(topic.getId(), topicTitle, durationInDays);
     }
 }
