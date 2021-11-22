@@ -57,4 +57,4 @@ VALUES (SELECT ID FROM STUDENT WHERE NAME = 'Ivan', SELECT ID FROM COURSE WHERE 
 INSERT INTO RECORD_BOOK_TOPIC_SCORE (RECORD_BOOK_ID, TOPIC_SCORE_ID)
 VALUES (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
        (2, 7), (2, 8), (2, 9), (2, 10), (2, 11), (2, 12),
-       (3, 13), (3, 14), (3, 15);
+       (3, 13), (3, 14), (3, 15), (3, 16);
