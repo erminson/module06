@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Course {
+    private long id;
     private String title;
     private List<Topic> topics;
 
