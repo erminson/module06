@@ -24,7 +24,7 @@ public class AppConfig {
         return StudentRepositoryYamlInitializer.create();
     }
 
-    @Bean
+    @Bean("recordBookRepositoryYaml")
     public RecordBookRepository createRecordBookRepository(
             @Qualifier("studentRepositoryJdbc") StudentRepository studentRepository
     ) {
