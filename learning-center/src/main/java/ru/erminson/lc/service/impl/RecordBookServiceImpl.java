@@ -1,6 +1,6 @@
 package ru.erminson.lc.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.RecordBook;
@@ -17,8 +17,7 @@ import java.util.List;
 public class RecordBookServiceImpl implements RecordBookService {
     private final RecordBookRepository recordBookRepository;
 
-    @Autowired
-    public RecordBookServiceImpl(RecordBookRepository recordBookRepository) {
+    public RecordBookServiceImpl(@Qualifier("recordBookRepositoryJdbc") RecordBookRepository recordBookRepository) {
         this.recordBookRepository = recordBookRepository;
     }
 
@@ -58,7 +57,7 @@ public class RecordBookServiceImpl implements RecordBookService {
             return 0;
         }
 
-        return (int)recordBook.getTopics().stream()
+        return (int) recordBook.getTopics().stream()
                 .filter(topicScore -> topicScore.getScore() != 0)
                 .count();
     }
