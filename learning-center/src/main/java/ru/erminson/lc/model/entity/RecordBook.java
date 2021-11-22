@@ -15,12 +15,23 @@ import java.util.stream.Collectors;
 @Getter
 @AllArgsConstructor
 public class RecordBook {
+    private long id;
     private final String courseTitle;
     private final LocalDate startDate;
     private List<TopicScore> topics;
 
+    public RecordBook(String courseTitle, LocalDate startDate, List<TopicScore> topics) {
+        this.courseTitle = courseTitle;
+        this.startDate = startDate;
+        this.topics = topics;
+    }
+
     public void setTopics(List<TopicScore> topics) {
         this.topics = topics;
+    }
+
+    public void addTopic(TopicScore topicScore) {
+        topics.add(topicScore);
     }
 
     public TopicScore getTopicScoreByTitle(String topicTitle) {
