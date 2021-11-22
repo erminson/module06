@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Topic {
+    private long id;
     private String title;
     private Integer durationInHours;
 }
