@@ -58,6 +58,7 @@ public class CourseRepositoryJdbc extends AbstractCourseRepository {
                 course = map.computeIfAbsent(courseId, k -> null);
                 if (course == null) {
                     course = new Course();
+                    course.setId(rs.getLong(COURSE_ID_COLUMN));
                     course.setTitle(rs.getString(COURSE_TITLE_COLUMN));
                     course.setTopics(new ArrayList<>());
                     map.put(courseId, course);
@@ -65,6 +66,7 @@ public class CourseRepositoryJdbc extends AbstractCourseRepository {
                 long topicId = rs.getLong(TOPIC_ID_COLUMN);
                 if (topicId > 0) {
                     Topic topic = new Topic();
+                    topic.setId(rs.getLong(TOPIC_ID_COLUMN));
                     topic.setTitle(rs.getString(TOPIC_TITLE_COLUMN));
                     topic.setDurationInHours(rs.getInt(DURATION_IN_HOURS_COLUMN));
                     course.addTopic(topic);
