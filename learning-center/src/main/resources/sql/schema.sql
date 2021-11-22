@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS student
 (
     id         IDENTITY     NOT NULL PRIMARY KEY,
-    name       VARCHAR(128) NOT NULL,
+    name       VARCHAR(128) NOT NULL UNIQUE,
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
