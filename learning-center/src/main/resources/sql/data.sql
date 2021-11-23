@@ -44,10 +44,10 @@ VALUES (SELECT id FROM topic WHERE title = 'topic11', 100),
        (SELECT id FROM topic WHERE title = 'topic14', 0),
        (SELECT id FROM topic WHERE title = 'topic15', 0),
        (SELECT id FROM topic WHERE title = 'topic16', 0),
-       (SELECT id FROM topic WHERE title = 'topic11', 0),
-       (SELECT id FROM topic WHERE title = 'topic12', 90),
-       (SELECT id FROM topic WHERE title = 'topic13', 60),
-       (SELECT id FROM topic WHERE title = 'topic14', 80);
+       (SELECT id FROM topic WHERE title = 'topic21', 0),
+       (SELECT id FROM topic WHERE title = 'topic22', 90),
+       (SELECT id FROM topic WHERE title = 'topic23', 60),
+       (SELECT id FROM topic WHERE title = 'topic24', 80);
 
 INSERT INTO RECORD_BOOK (STUDENT_ID, COURSE_ID, START_DATE)
 VALUES (SELECT ID FROM STUDENT WHERE NAME = 'Ivan', SELECT ID FROM COURSE WHERE TITLE = 'Course1', '2021-09-15'),
