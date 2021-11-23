@@ -10,8 +10,13 @@ import java.util.List;
 
 @Repository("studentRepositoryJdbc")
 public class StudentRepositoryJdbc implements StudentRepository {
-    private static final String NAME_COLUMN = "name";
-    private static final String SQL = String.format("SELECT NAME %S FROM STUDENT;", NAME_COLUMN);
+    private static final String ID_COLUMN = "ID";
+    private static final String NAME_COLUMN = "NAME";
+
+    private static final String SQL = String.format(
+            "SELECT %s, %s FROM STUDENT;",
+            ID_COLUMN, NAME_COLUMN
+    );
     private static final String ADD_SQL = "INSERT INTO STUDENT (NAME) VALUES (?)";
     private static final String DELETE_BY_NAME_SQL = "DELETE FROM STUDENT WHERE NAME = ?";
 
@@ -24,7 +29,8 @@ public class StudentRepositoryJdbc implements StudentRepository {
     }
 
     private void init() {
-        this.students = jdbcTemplate.query(SQL, (rs, numRow) -> new Student(rs.getString(NAME_COLUMN)));
+        this.students = jdbcTemplate.query(SQL, (rs, numRow) ->
+                new Student(rs.getLong(ID_COLUMN), rs.getString(NAME_COLUMN)));
     }
 
     @Override
