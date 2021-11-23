@@ -23,22 +23,46 @@ import java.util.*;
 
 @Repository("recordBookRepositoryJdbc")
 public class RecordBookRepositoryJdbc implements RecordBookRepository {
-    private static final String SQL = "SELECT RB.STUDENT_ID,\n" +
-            "       S.NAME,\n" +
-            "       RB.ID,\n" +
-            "       C.TITLE COURSE_TITLE,\n" +
-            "       RB.START_DATE,\n" +
-            "       T.TITLE TOPIC_TITLE,\n" +
-            "       TS.SCORE,\n" +
-            "       T.DURATION_IN_HOURS,\n" +
-            "       CT.PRIORITY\n" +
-            "FROM RECORD_BOOK RB\n" +
-            "         JOIN STUDENT S ON RB.STUDENT_ID = S.ID\n" +
-            "         JOIN RECORD_BOOK_TOPIC_SCORE RBTS ON RBTS.RECORD_BOOK_ID = RB.ID\n" +
-            "         JOIN TOPIC_SCORE TS ON TS.ID = RBTS.TOPIC_SCORE_ID\n" +
-            "         JOIN TOPIC T ON T.ID = TS.TOPIC_ID\n" +
-            "         JOIN COURSE_TOPIC CT ON CT.TOPIC_ID = T.ID\n" +
-            "         JOIN COURSE C on C.ID = CT.COURSE_ID;";
+    private static final String RECORD_BOOK_ID_COLUMN = "RECORD_BOOK_ID";
+    private static final String STUDENT_ID_COLUMN = "STUDENT_ID";
+    private static final String STUDENT_NAME_COLUMN = "STUDENT_NAME";
+    private static final String COURSE_ID_COLUMN = "COURSE_ID";
+    private static final String COURSE_TITLE_COLUMN = "COURSE_TITLE";
+    private static final String START_DATE_COLUMN = "START_DATE";
+    private static final String TOPIC_SCORE_ID_COLUMN = "TOPIC_SCORE_ID";
+    private static final String TOPIC_ID_COLUMN = "TOPIC_ID";
+    private static final String TOPIC_TITLE_COLUMN = "TOPIC_TITLE";
+    private static final String TOPIC_SCORE_COLUMN = "TOPIC_SCORE";
+    private static final String DURATION_IN_HOURS_COLUMN = "DURATION_IN_HOURS";
+    private static final String PRIORITY_COLUMN = "PRIORITY_HOURS";
+
+    private static final String SQL = String.format(
+            "SELECT\n" +
+                    "       RB.ID               %s,\n" +
+                    "       RB.STUDENT_ID       %s,\n" +
+                    "       S.NAME              %s,\n" +
+                    "       C.ID                %s,\n" +
+                    "       C.TITLE             %s,\n" +
+                    "       RB.START_DATE       %s,\n" +
+                    "       TS.ID               %s,\n" +
+                    "       T.ID                %s,\n" +
+                    "       T.TITLE             %s,\n" +
+                    "       TS.SCORE            %s,\n" +
+                    "       T.DURATION_IN_HOURS %s,\n" +
+                    "       CT.PRIORITY         %s\n" +
+                    "FROM RECORD_BOOK RB\n" +
+                    "         JOIN STUDENT S ON RB.STUDENT_ID = S.ID\n" +
+                    "         JOIN RECORD_BOOK_TOPIC_SCORE RBTS ON RBTS.RECORD_BOOK_ID = RB.ID\n" +
+                    "         JOIN TOPIC_SCORE TS ON TS.ID = RBTS.TOPIC_SCORE_ID\n" +
+                    "         JOIN TOPIC T ON T.ID = TS.TOPIC_ID\n" +
+                    "         JOIN COURSE_TOPIC CT ON CT.TOPIC_ID = T.ID\n" +
+                    "         JOIN COURSE C on C.ID = CT.COURSE_ID;",
+            RECORD_BOOK_ID_COLUMN,
+            STUDENT_ID_COLUMN, STUDENT_NAME_COLUMN,
+            COURSE_ID_COLUMN, COURSE_TITLE_COLUMN, START_DATE_COLUMN,
+            TOPIC_SCORE_ID_COLUMN, TOPIC_ID_COLUMN, TOPIC_TITLE_COLUMN, TOPIC_SCORE_COLUMN,
+            DURATION_IN_HOURS_COLUMN, PRIORITY_COLUMN
+    );
 
     private static final String INSERT_RECORD_BOOK_SQL =
             "INSERT INTO RECORD_BOOK (STUDENT_ID, COURSE_ID, START_DATE)\n" +
@@ -54,6 +78,29 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
 
     private static final String GET_STUDENT_ID_SQL = "SELECT ID FROM STUDENT WHERE NAME = ?";
     private static final String GET_COURSE_ID_SQL = "SELECT ID FROM COURSE WHERE TITLE = ?";
+
+    private static final String UPDATE_TOPIC_SCORE_SQL =
+            "UPDATE TOPIC_SCORE\n" +
+                    "SET score = ?\n" +
+                    "WHERE id = ?;";
+
+    private static final String GET_RECORD_BOOK_ID =
+            "SELECT ID\n" +
+                    "FROM RECORD_BOOK\n" +
+                    "WHERE STUDENT_ID = ?;";
+
+    private static final String DELETE_TOPIC_SCORES_SQL =
+            "DELETE\n" +
+                    "FROM TOPIC_SCORE\n" +
+                    "WHERE ID IN (SELECT TS.ID\n" +
+                    "    FROM TOPIC_SCORE TS\n" +
+                    "    JOIN RECORD_BOOK_TOPIC_SCORE RBTS ON RBTS.TOPIC_SCORE_ID = TS.ID\n" +
+                    "    WHERE RBTS.RECORD_BOOK_ID = ?);";
+
+    private static final String DELETE_RECORD_BOOK_BY_ID_SQL =
+            "DELETE\n" +
+                    "FROM RECORD_BOOK\n" +
+                    "WHERE ID = ?;";
 
     private final JdbcTemplate jdbcTemplate;
     private Map<Student, RecordBook> storage;
@@ -122,6 +169,13 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     }
 
     @Override
+    public boolean rateTopic(TopicScore topicScore, int score) {
+        int updatedCount = jdbcTemplate.update(UPDATE_TOPIC_SCORE_SQL, score, topicScore.getId());
+        init();
+        return updatedCount > 0;
+    }
+
+    @Override
     public RecordBook getRecordBook(Student student) {
         return storage.get(student);
     }
@@ -132,8 +186,16 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     }
 
     @Override
+    @Transactional
     public boolean removeStudentFromCourse(Student student) {
-        storage.remove(student);
+        Long recordBookId = jdbcTemplate.queryForObject(GET_RECORD_BOOK_ID, Long.class, student.getId());
+        long deletedTopicCount = jdbcTemplate.update(DELETE_TOPIC_SCORES_SQL, recordBookId);
+        long deletedRecordBookCount = jdbcTemplate.update(DELETE_RECORD_BOOK_BY_ID_SQL, recordBookId);
+
+        if (deletedTopicCount > 0 && deletedRecordBookCount > 0) {
+            storage.remove(student);
+        }
+
         return true;
     }
 
@@ -148,23 +210,27 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
             Map<Student, RecordBook> map = new HashMap<>();
 
             while (rs.next()) {
-                String name = rs.getString(2); // STUDENT_NAME_COLUMN
-                Student student = new Student(name);
+                long studentId = rs.getLong(STUDENT_ID_COLUMN);
+                String name = rs.getString(STUDENT_NAME_COLUMN);
+                Student student = new Student(studentId, name);
 
                 if (!map.containsKey(student)) {
-                    String courseTitle = rs.getString(4); // COURSE_TITLE_COLUMN
-                    LocalDate startDate = rs.getDate(5).toLocalDate();
-                    RecordBook recordBook = new RecordBook(courseTitle, startDate, new ArrayList<>());
+                    long recordBookId = rs.getLong(RECORD_BOOK_ID_COLUMN);
+                    String courseTitle = rs.getString(COURSE_TITLE_COLUMN);
+                    LocalDate startDate = rs.getDate(START_DATE_COLUMN).toLocalDate();
+                    RecordBook recordBook = new RecordBook(recordBookId, courseTitle, startDate, new ArrayList<>());
                     map.put(student, recordBook);
                 }
 
                 RecordBook recordBook = map.get(student);
 
-                String topicTitle = rs.getString(6); // TOPIC_TITLE_COLUMN
-                int score = rs.getInt(7); // SCORE_COLUMN
+                long topicScoreId = rs.getLong(TOPIC_SCORE_ID_COLUMN);
+                long topicId = rs.getLong(TOPIC_ID_COLUMN);
+                String topicTitle = rs.getString(TOPIC_TITLE_COLUMN);
+                int score = rs.getInt(TOPIC_SCORE_COLUMN);
                 // TODO: convert into duration in days
-                Duration durationInHours = Duration.ofHours(rs.getInt(8)); // DURATION_IN_HOURS_COLUMN
-                TopicScore topicScore = new TopicScore(topicTitle, score, durationInHours);
+                Duration durationInHours = Duration.ofHours(rs.getInt(DURATION_IN_HOURS_COLUMN));
+                TopicScore topicScore = new TopicScore(topicScoreId, topicId, topicTitle, score, durationInHours);
 
                 recordBook.addTopic(topicScore);
             }
