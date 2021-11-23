@@ -66,7 +66,10 @@ public class Main implements CommandLineRunner {
         studyService.addStudentByName(studentName);
         studyService.enrollStudentOnCourse(studentName, courseTitle);
 
-        studyService.addStudentByName("Michael");
+        String temporaryStudentName = "Michael";
+        studyService.addStudentByName(temporaryStudentName);
+        studyService.enrollStudentOnCourse(temporaryStudentName, courseTitle);
+        studyService.dismissStudentFromCourse(temporaryStudentName);
         studyService.removeStudentByName("Michael");
 
         StudentReport studentReportLev = studyService.getStudentReportByStudentName(studentName);
