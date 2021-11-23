@@ -105,8 +105,8 @@ public class StudyServiceImpl implements StudyService {
             }
 
             TopicScore topicScore = recordBook.getTopicScoreByTitle(topicTitle);
-            topicScore.setScore(score);
-            return true;
+//            topicScore.setScore(score);
+            return recordBookService.rateTopic(topicScore, score);
         }
 
         return false;
@@ -246,13 +246,12 @@ public class StudyServiceImpl implements StudyService {
             return null;
         }
 
-        //
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            log.error(e.getMessage());
-            Thread.currentThread().interrupt();
-        }
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            log.error(e.getMessage());
+//            Thread.currentThread().interrupt();
+//        }
 
         boolean ability = canStudentCompleteCourseByStudentName(name, nowDate);
         RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
