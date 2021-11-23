@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
+import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
 import ru.erminson.lc.service.RecordBookService;
 import ru.erminson.lc.utils.RecordBookInitializer;
@@ -48,6 +49,11 @@ public class RecordBookServiceImpl implements RecordBookService {
     @Override
     public List<Student> getAllStudentsOnCourses() {
         return recordBookRepository.getAllStudents();
+    }
+
+    @Override
+    public boolean rateTopic(TopicScore topicScore, int score) {
+        return recordBookRepository.rateTopic(topicScore, score);
     }
 
     @Override
