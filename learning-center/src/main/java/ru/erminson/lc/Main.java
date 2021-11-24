@@ -70,7 +70,7 @@ public class Main implements CommandLineRunner {
         studyService.addStudentByName(temporaryStudentName);
         studyService.enrollStudentOnCourse(temporaryStudentName, courseTitle);
         studyService.dismissStudentFromCourse(temporaryStudentName);
-        studyService.removeStudentByName("Michael");
+        studyService.removeStudentByName(temporaryStudentName);
 
         StudentReport studentReportLev = studyService.getStudentReportByStudentName(studentName);
         view.printStudentReport(studentReportLev);
