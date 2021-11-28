@@ -1,12 +1,13 @@
 package ru.erminson.lc.repository.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
@@ -21,7 +22,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
 
-@Repository("recordBookRepositoryJdbc")
+@Slf4j
 public class RecordBookRepositoryJdbc implements RecordBookRepository {
     private static final String RECORD_BOOK_ID_COLUMN = "RECORD_BOOK_ID";
     private static final String STUDENT_ID_COLUMN = "STUDENT_ID";
@@ -63,7 +64,7 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
             TOPIC_SCORE_ID_COLUMN, TOPIC_ID_COLUMN, TOPIC_TITLE_COLUMN, TOPIC_SCORE_COLUMN,
             DURATION_IN_HOURS_COLUMN, PRIORITY_COLUMN
     );
-    private static final String GET_RECORD_BOOK_BY_STUDENT_NAME =
+    private static final String GET_RECORD_BOOK_BY_STUDENT_NAME_SQL =
             String.format("%s\nWHERE S.NAME = ?", GET_ALL_RECORD_BOOKS_SQL);
 
     private static final String INSERT_RECORD_BOOK_SQL =
@@ -183,11 +184,11 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     }
 
     @Override
-    public RecordBook getRecordBook(Student student) {
+    public RecordBook getRecordBook(String studentName) {
         Map<Student, RecordBook> map = jdbcTemplate.query(
-                GET_RECORD_BOOK_BY_STUDENT_NAME,
+                GET_RECORD_BOOK_BY_STUDENT_NAME_SQL,
                 new StudentWithRecordBookExtractor(),
-                student.getName()
+                studentName
         );
 
         if (Objects.isNull(map)) {
@@ -195,7 +196,17 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
             return null;
         }
 
+        Student student = map.keySet().stream()
+                .filter(s -> s.getName().equals(studentName))
+                .findFirst()
+                .orElseGet(() -> new Student(studentName));
+
         return map.get(student);
+    }
+
+    @Override
+    public RecordBook getRecordBook(Student student) {
+        return getRecordBook(student.getName());
     }
 
     @Override
@@ -211,11 +222,18 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     @Override
     @Transactional
     public boolean removeStudentFromCourse(Student student) {
-        Long recordBookId = jdbcTemplate.queryForObject(GET_RECORD_BOOK_ID, Long.class, student.getId());
-        jdbcTemplate.update(DELETE_TOPIC_SCORES_SQL, recordBookId);
-        jdbcTemplate.update(DELETE_RECORD_BOOK_BY_ID_SQL, recordBookId);
+        Long recordBookId;
+        try {
+            recordBookId = jdbcTemplate.queryForObject(GET_RECORD_BOOK_ID, Long.class, student.getId());
+        } catch (EmptyResultDataAccessException e) {
+            log.error(e.getMessage());
+            return false;
+        }
 
-        return true;
+        int deletedTopicsNumber = jdbcTemplate.update(DELETE_TOPIC_SCORES_SQL, recordBookId);
+        int deletedRecordBooksNumber = jdbcTemplate.update(DELETE_RECORD_BOOK_BY_ID_SQL, recordBookId);
+
+        return deletedTopicsNumber > 0 || deletedRecordBooksNumber > 0;
     }
 
     @Override

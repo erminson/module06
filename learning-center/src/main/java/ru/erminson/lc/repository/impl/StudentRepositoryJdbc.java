@@ -2,7 +2,6 @@ package ru.erminson.lc.repository.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
 import ru.erminson.lc.repository.StudentRepository;
@@ -12,7 +11,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
-@Repository("studentRepositoryJdbc")
 public class StudentRepositoryJdbc implements StudentRepository {
     private static final String ID_COLUMN = "ID";
     private static final String NAME_COLUMN = "NAME";

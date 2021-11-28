@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.Topic;
@@ -18,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-@Repository("courseRepositoryJdbc")
 public class CourseRepositoryJdbc implements CourseRepository {
     private static final String COURSE_ID_COLUMN = "COURSE_ID";
     private static final String COURSE_TITLE_COLUMN = "COURSE_TITLE";

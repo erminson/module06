@@ -9,6 +9,7 @@ import java.util.List;
 public interface RecordBookRepository {
     boolean addStudentWithRecordBook(Student student, RecordBook recordBook);
     boolean rateTopic(TopicScore topicScore, int score);
+    RecordBook getRecordBook(String studentName);
     RecordBook getRecordBook(Student student);
     boolean isStudentOnCourse(Student student);
     boolean removeStudentFromCourse(Student student);

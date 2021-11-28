@@ -1,6 +1,5 @@
 package ru.erminson.lc.service.impl;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
@@ -13,7 +12,7 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
 
-    public StudentServiceImpl(@Qualifier("studentRepositoryJdbc") StudentRepository studentRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
 

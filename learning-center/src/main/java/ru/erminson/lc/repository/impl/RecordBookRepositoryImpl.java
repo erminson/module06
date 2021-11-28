@@ -34,6 +34,15 @@ public class RecordBookRepositoryImpl implements RecordBookRepository {
     }
 
     @Override
+    public RecordBook getRecordBook(String studentName) {
+        Student student = storage.keySet().stream()
+                .filter(s -> s.getName().equals(studentName))
+                .findFirst()
+                .orElseGet(() -> new Student(studentName));
+        return storage.get(student);
+    }
+
+    @Override
     public RecordBook getRecordBook(Student student) {
         return storage.get(student);
     }
