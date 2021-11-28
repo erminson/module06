@@ -3,6 +3,7 @@ package ru.erminson.lc.utils;
 import lombok.extern.slf4j.Slf4j;
 import ru.erminson.lc.model.dto.report.StudentReport;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ public class ReportSaverUtils {
     private static final String DATE_TEMPLATE = "yyyy-MM-dd";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_TEMPLATE);
 
+    private static final String REPORTS_DIRECTORY_NAME = "reports";
     private static final String REPORT_FILE_NAME_TEMPLATE = "students_report_(%s)";
 
     private static final String NUMBER_HEADER = "#";
@@ -117,10 +119,16 @@ public class ReportSaverUtils {
     }
 
     private static void save(String reportString) {
-        log.info("\n{}", reportString);
+        log.debug("\n{}", reportString);
         String reportDate = LocalDate.now().format(FORMATTER);
-        String fileName = String.format(REPORT_FILE_NAME_TEMPLATE, reportDate);
-        try (FileWriter fileWriter = new FileWriter(fileName)) {
+
+        File directory = new File(REPORTS_DIRECTORY_NAME);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+
+        File reportFile = new File(REPORTS_DIRECTORY_NAME, String.format(REPORT_FILE_NAME_TEMPLATE, reportDate));
+        try (FileWriter fileWriter = new FileWriter(reportFile)) {
             fileWriter.write(reportString);
         } catch (IOException e) {
             log.error(e.getMessage());
