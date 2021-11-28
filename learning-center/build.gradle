@@ -44,4 +44,12 @@ dependencies {
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage'
+    }
+}
+
+test {
+    useJUnitPlatform()
 }
