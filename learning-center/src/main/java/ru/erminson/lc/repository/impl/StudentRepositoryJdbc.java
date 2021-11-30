@@ -1,5 +1,8 @@
 package ru.erminson.lc.repository.impl;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import ru.erminson.lc.model.entity.Student;
@@ -9,8 +12,8 @@ import ru.erminson.lc.repository.StudentRepository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 
+@Slf4j
 public class StudentRepositoryJdbc implements StudentRepository {
     private static final String ID_COLUMN = "ID";
     private static final String NAME_COLUMN = "NAME";
@@ -31,24 +34,39 @@ public class StudentRepositoryJdbc implements StudentRepository {
 
     @Override
     public boolean addStudent(String name) {
-        int updateCount = jdbcTemplate.update(ADD_STUDENT_SQL, name);
-        return updateCount > 0;
+        try {
+            jdbcTemplate.update(ADD_STUDENT_SQL, name);
+            log.debug("Student: {} was added", name);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Student: {} hasn't added. {}", name, e.getMessage());
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public boolean removeStudent(String name) throws IllegalInitialDataException {
         int deleteCount = jdbcTemplate.update(DELETE_STUDENT_BY_NAME_SQL, name);
-        return deleteCount > 0;
+        if (deleteCount == 0) {
+            log.error("Student: {} hasn't removed.", name);
+            throw new IllegalInitialDataException("Student: " + name + " doesn't exist");
+        }
+
+        log.debug("Student: {} was removed", name);
+        return true;
     }
 
     @Override
     public Student getStudentByName(String name) throws IllegalInitialDataException {
-        Student student = jdbcTemplate.queryForObject(GET_STUDENT_BY_NAME_SQL, new StudentRowMapper(), name);
-        if (Objects.isNull(student)) {
+        try {
+            Student student = jdbcTemplate.queryForObject(GET_STUDENT_BY_NAME_SQL, new StudentRowMapper(), name);
+            log.debug("Student: {} was found.", name);
+            return student;
+        } catch (EmptyResultDataAccessException e) {
+            log.error("Student: {} wasn't found.", name);
             throw new IllegalInitialDataException(String.format("Student '%s' not found", name));
         }
-
-        return student;
     }
 
     @Override
