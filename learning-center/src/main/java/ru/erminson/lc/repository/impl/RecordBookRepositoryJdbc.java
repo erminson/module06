@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
+import ru.erminson.lc.model.entity.Topic;
 import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
 
@@ -18,7 +19,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -127,18 +127,19 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     @Override
     @Transactional
     public boolean addStudentWithRecordBook(Student student, RecordBook recordBook) {
-        Long studentId = jdbcTemplate.queryForObject(GET_STUDENT_ID_SQL, Long.class, student.getName());
-        Long courseId = jdbcTemplate.queryForObject(GET_COURSE_ID_SQL, Long.class, recordBook.getCourseTitle());
-
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(INSERT_RECORD_BOOK_SQL, new String[]{"ID"});
-            ps.setLong(1, studentId);
-            ps.setLong(2, courseId);
-            ps.setDate(3, Date.valueOf(recordBook.getStartDate()));
-
-            return ps;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(INSERT_RECORD_BOOK_SQL, new String[]{"ID"});
+                ps.setLong(1, student.getId());
+                ps.setLong(2, recordBook.getCourseId());
+                ps.setDate(3, Date.valueOf(recordBook.getStartDate()));
+                return ps;
+            }, keyHolder);
+        } catch (DataAccessException e) {
+            log.error("Record book: {} wasn't added", recordBook.toString());
+            return false;
+        }
 
         Long recordBookId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         List<Long> topicScoreIds = insertTopicScoresIntoDB(recordBook.getTopics());
@@ -261,7 +262,8 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
                     long recordBookId = rs.getLong(RECORD_BOOK_ID_COLUMN);
                     String courseTitle = rs.getString(COURSE_TITLE_COLUMN);
                     LocalDate startDate = rs.getDate(START_DATE_COLUMN).toLocalDate();
-                    RecordBook recordBook = new RecordBook(recordBookId, courseTitle, startDate, new ArrayList<>());
+                    long courseId = rs.getLong(COURSE_ID_COLUMN);
+                    RecordBook recordBook = new RecordBook(recordBookId, courseId, courseTitle, startDate, new ArrayList<>());
                     map.put(student, recordBook);
                 }
 
@@ -271,9 +273,10 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
                 long topicId = rs.getLong(TOPIC_ID_COLUMN);
                 String topicTitle = rs.getString(TOPIC_TITLE_COLUMN);
                 int score = rs.getInt(TOPIC_SCORE_COLUMN);
-                // TODO: convert into duration in days
-                Duration durationInHours = Duration.ofHours(rs.getInt(DURATION_IN_HOURS_COLUMN));
-                TopicScore topicScore = new TopicScore(topicScoreId, topicId, topicTitle, score, durationInHours);
+                int durationInHours = rs.getInt(DURATION_IN_HOURS_COLUMN);
+                Topic topic = new Topic(topicId, topicTitle, durationInHours);
+
+                TopicScore topicScore = TopicScore.create(topicScoreId, score, topic);
 
                 recordBook.addTopic(topicScore);
             }
