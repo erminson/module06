@@ -1,6 +1,8 @@
 package ru.erminson.lc.repository.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -17,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+@Slf4j
 public class CourseRepositoryJdbc implements CourseRepository {
     private static final String COURSE_ID_COLUMN = "COURSE_ID";
     private static final String COURSE_TITLE_COLUMN = "COURSE_TITLE";
@@ -60,12 +63,18 @@ public class CourseRepositoryJdbc implements CourseRepository {
     @Transactional
     public boolean add(Course course) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(ADD_COURSE_SQL, new String[]{"ID"});
-            ps.setString(1, course.getTitle());
 
-            return ps;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(ADD_COURSE_SQL, new String[]{"ID"});
+                ps.setString(1, course.getTitle());
+
+                return ps;
+            }, keyHolder);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Course: {} hasn't added. {}", course.getTitle(), e.getMessage());
+            return false;
+        }
 
         Long courseId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         List<Long> topicIds = insertTopicsIntoDB(course.getTopics());
