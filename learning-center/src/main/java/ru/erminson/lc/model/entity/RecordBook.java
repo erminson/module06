@@ -16,16 +16,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RecordBook {
     private final long id;
+    private final long courseId;
     private final String courseTitle;
     private final LocalDate startDate;
     private List<TopicScore> topics;
-
-    public RecordBook(String courseTitle, LocalDate startDate, List<TopicScore> topics) {
-        this.id = 0;
-        this.courseTitle = courseTitle;
-        this.startDate = startDate;
-        this.topics = topics;
-    }
 
     public void setTopics(List<TopicScore> topics) {
         this.topics = topics;
