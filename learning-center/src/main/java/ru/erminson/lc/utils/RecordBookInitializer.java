@@ -61,6 +61,6 @@ public class RecordBookInitializer {
                 )
                 .collect(Collectors.toList());
 
-        return new RecordBook(courseTitle, localDate, topics);
+        return new RecordBook(0, 0, courseTitle, localDate, topics);
     }
 }
