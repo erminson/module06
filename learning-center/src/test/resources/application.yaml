@@ -1,0 +1,25 @@
+spring:
+  sql:
+    init:
+      schema-locations: sql/schema.sql
+#      data-locations: sql/data.sql
+  datasource:
+    driverClassName: org.h2.Driver
+    jdbc-url: jdbc:h2:mem:lc
+    username: admin
+    password: admin
+    hikari:
+      maximum-pool-size:  10
+  h2:
+    console:
+      enabled: true
+
+logging:
+  enabled: true
+  packages:
+    - ru.erminson.lc.bean_post_processor
+#    - ru.erminson.lc.repository
+#    - ru.erminson.lc.service
+topic:
+  title: TopicTitle2
+  duration: 2
