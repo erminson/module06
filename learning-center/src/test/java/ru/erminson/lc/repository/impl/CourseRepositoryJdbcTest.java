@@ -5,20 +5,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.erminson.lc.configuration.TestConfig;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.Topic;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
+import ru.erminson.lc.utils.SqlFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
+@Import(TestConfig.class)
 class CourseRepositoryJdbcTest {
     private final CourseRepositoryJdbc courseRepositoryJdbc;
 
@@ -43,8 +46,20 @@ class CourseRepositoryJdbcTest {
     private final Course course2 = new Course(2, "Course2", topics2);
 
     @Autowired
-    public CourseRepositoryJdbcTest(JdbcTemplate jdbcTemplate) {
+    public CourseRepositoryJdbcTest(JdbcTemplate jdbcTemplate, SqlFactory sqlFactory) {
         courseRepositoryJdbc = new CourseRepositoryJdbc(jdbcTemplate);
+        courseRepositoryJdbc.setSqlFactory(sqlFactory);
+    }
+
+    @Test
+    void shouldBeFalseIfCourseDoesntExist() {
+        assertThat(courseRepositoryJdbc.isExistCourseByTitle("sd"), is(false));
+    }
+
+    @Test
+    void shouldBeTrueIfCourseExists() {
+        courseRepositoryJdbc.add(course1);
+        assertThat(courseRepositoryJdbc.isExistCourseByTitle(course1.getTitle()), is(true));
     }
 
     @Test
@@ -96,7 +111,7 @@ class CourseRepositoryJdbcTest {
                 () -> assertEquals(expectedCountTopics, actualTopics.size())
         );
     }
-    
+
     @BeforeEach
     void setUp() {
     }

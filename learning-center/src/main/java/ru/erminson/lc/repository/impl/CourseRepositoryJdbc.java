@@ -1,11 +1,13 @@
 package ru.erminson.lc.repository.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.Topic;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
 import ru.erminson.lc.repository.CourseRepository;
+import ru.erminson.lc.utils.SqlFactory;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,64 +24,30 @@ import java.util.*;
 
 @Slf4j
 public class CourseRepositoryJdbc implements CourseRepository {
-    private static final String COURSE_ID_COLUMN = "COURSE_ID";
-    private static final String COURSE_TITLE_COLUMN = "COURSE_TITLE";
-    private static final String TOPIC_ID_COLUMN = "TOPIC_ID";
-    private static final String TOPIC_TITLE_COLUMN = "TOPIC_TITLE";
-    private static final String DURATION_IN_HOURS_COLUMN = "DURATION_IN_HOURS";
-
-    private static final String GET_ALL_COURSES_SQL =
-            String.format(
-                    "SELECT \n" +
-                            "C.ID %s,\n" +
-                            "C.TITLE %s,\n" +
-                            "T.ID %s,\n" +
-                            "T.TITLE %s,\n" +
-                            "T.DURATION_IN_HOURS %s\n" +
-                            "FROM COURSE_TOPIC CT\n" +
-                            "JOIN COURSE C ON CT.COURSE_ID = C.ID\n" +
-                            "JOIN TOPIC T ON CT.TOPIC_ID = T.ID",
-                    COURSE_ID_COLUMN, COURSE_TITLE_COLUMN,
-                    TOPIC_ID_COLUMN, TOPIC_TITLE_COLUMN, DURATION_IN_HOURS_COLUMN);
-    private static final String GET_COURSE_BY_TITLE_SQL =
-            String.format("%s\nWHERE C.TITLE = ?", GET_ALL_COURSES_SQL);
-
-    private static final String ADD_COURSE_SQL = "INSERT INTO COURSE (TITLE) VALUES (?)";
-    private static final String ADD_TOPIC_SQL = "INSERT INTO TOPIC (TITLE, DURATION_IN_HOURS) VALUES (?, ?)";
-    private static final String ADD_COURSE_TOPIC_SQL =
-            "INSERT INTO COURSE_TOPIC (COURSE_ID, TOPIC_ID, PRIORITY)\n" +
-                    "VALUES (?, ?, ?);";
-    private static final String GET_COURSE_ROW_BY_TITLE_SQL =
-            String.format(
-                    "SELECT ID %s, TITLE %s FROM COURSE WHERE COURSE.TITLE = ?",
-                    COURSE_ID_COLUMN, COURSE_TITLE_COLUMN);
-
     private final JdbcTemplate jdbcTemplate;
+    private SqlFactory sqlFactory;
+
+    private final KeyHolder keyHolder = new GeneratedKeyHolder();
 
     public CourseRepositoryJdbc(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Autowired
+    public void setSqlFactory(SqlFactory sqlFactory) {
+        this.sqlFactory = sqlFactory;
+    }
+
     @Override
     @Transactional
     public boolean add(Course course) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        try {
-            jdbcTemplate.update(con -> {
-                PreparedStatement ps = con.prepareStatement(ADD_COURSE_SQL, new String[]{"ID"});
-                ps.setString(1, course.getTitle());
-
-                return ps;
-            }, keyHolder);
-        } catch (DataIntegrityViolationException e) {
-            log.error("Course: {} hasn't added. {}", course.getTitle(), e.getMessage());
+        Long courseId = insertCourse(course);
+        if (Objects.isNull(courseId)) {
             return false;
         }
 
-        Long courseId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         List<Long> topicIds = insertTopicsIntoDB(course.getTopics());
-        jdbcTemplate.batchUpdate(ADD_COURSE_TOPIC_SQL, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sqlFactory.getSqlQuery("course/insert-course-topic.sql"), new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Long topicId = topicIds.get(i);
@@ -96,12 +65,33 @@ public class CourseRepositoryJdbc implements CourseRepository {
         return true;
     }
 
+    private Long insertCourse(Course course) {
+        try {
+            jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(
+                        sqlFactory.getSqlQuery("course/insert-course.sql"),
+                        new String[]{"ID"}
+                );
+                ps.setString(1, course.getTitle());
+
+                return ps;
+            }, keyHolder);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Course: {} hasn't added. {}", course.getTitle(), e.getMessage());
+            return null;
+        }
+
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
+    }
+
     private List<Long> insertTopicsIntoDB(List<Topic> topics) {
         List<Long> ids = new ArrayList<>();
-        KeyHolder keyHolder = new GeneratedKeyHolder();
         topics.forEach(topic -> {
             jdbcTemplate.update(con -> {
-                PreparedStatement ps = con.prepareStatement(ADD_TOPIC_SQL, new String[]{"ID"});
+                PreparedStatement ps = con.prepareStatement(
+                        sqlFactory.getSqlQuery("course/insert-topics.sql"),
+                        new String[]{"ID"}
+                );
                 ps.setString(1, topic.getTitle());
                 ps.setInt(2, topic.getDurationInHours());
                 return ps;
@@ -115,28 +105,25 @@ public class CourseRepositoryJdbc implements CourseRepository {
 
     @Override
     public boolean isExistCourseByTitle(String courseTitle) {
-        Course course = jdbcTemplate.queryForObject(
-                GET_COURSE_ROW_BY_TITLE_SQL,
-                (rs, rowNum) -> new Course(
-                        rs.getLong(COURSE_ID_COLUMN),
-                        rs.getString(COURSE_TITLE_COLUMN)
-                ),
-                courseTitle
-        );
-
-        return course == null;
+        String sql = sqlFactory.getSqlQuery("course/select-course-row-by-title.sql");
+        RowCountCallbackHandler handler = new RowCountCallbackHandler();
+        jdbcTemplate.query(sql, handler, courseTitle);
+        return handler.getRowCount() > 0;
     }
 
     @Override
     public List<Course> getAllCourses() {
-        return jdbcTemplate.query(GET_ALL_COURSES_SQL, new CourseWithTopicsExtractor());
+        String sql = sqlFactory.getSqlQuery("course/select-all-courses.sql");
+        return jdbcTemplate.query(sql, new CourseWithTopicsExtractor());
     }
 
     @Override
     public Course getCourseByTitle(String title) throws IllegalInitialDataException {
-        List<Course> courses = jdbcTemplate.query(GET_COURSE_BY_TITLE_SQL, new CourseWithTopicsExtractor(), title);
-        assert courses != null;
-        if (courses.isEmpty()) {
+        String sql = sqlFactory.getSqlQuery("course/select-course-by-title.sql");
+        List<Course> courses = jdbcTemplate.query(sql, new CourseWithTopicsExtractor(), title);
+
+        if (courses == null || courses.isEmpty()) {
+            log.error("Course: {} bit found", title);
             throw new IllegalInitialDataException(String.format("Course '%s' not found", title));
         }
 
@@ -154,21 +141,21 @@ public class CourseRepositoryJdbc implements CourseRepository {
         public List<Course> extractData(ResultSet rs) throws SQLException, DataAccessException {
             Map<Long, Course> map = new HashMap<>();
             while (rs.next()) {
-                long courseId = rs.getLong(COURSE_ID_COLUMN);
+                long courseId = rs.getLong("COURSE_ID");
                 Course course = map.get(courseId);
                 if (course == null) {
                     course = new Course();
                     course.setId(courseId);
-                    course.setTitle(rs.getString(COURSE_TITLE_COLUMN));
+                    course.setTitle(rs.getString("COURSE_TITLE"));
                     course.setTopics(new ArrayList<>());
                     map.put(courseId, course);
                 }
-                long topicId = rs.getLong(TOPIC_ID_COLUMN);
+                long topicId = rs.getLong("TOPIC_ID");
                 if (topicId > 0) {
                     Topic topic = new Topic();
                     topic.setId(topicId);
-                    topic.setTitle(rs.getString(TOPIC_TITLE_COLUMN));
-                    topic.setDurationInHours(rs.getInt(DURATION_IN_HOURS_COLUMN));
+                    topic.setTitle(rs.getString("TOPIC_TITLE"));
+                    topic.setDurationInHours(rs.getInt("DURATION_IN_HOURS"));
                     course.addTopic(topic);
                 }
             }
