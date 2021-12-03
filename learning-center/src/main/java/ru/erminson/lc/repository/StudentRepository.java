@@ -1,14 +1,14 @@
 package ru.erminson.lc.repository;
 
 import ru.erminson.lc.model.entity.Student;
-import ru.erminson.lc.model.exception.IllegalInitialDataException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StudentRepository {
-    boolean addStudent(String name);
-    boolean removeStudent(String name) throws IllegalInitialDataException;
-    Student getStudentByName(String name) throws IllegalInitialDataException;
-    List<Student> getAllStudents();
-    boolean isExistsStudent(String name);
+    boolean save(String name);
+    List<Student> findAll();
+    Optional<Student> findById(long id);
+    Optional<Student> findByName(String name);
+    boolean deleteByName(String name);
 }

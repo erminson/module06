@@ -1,12 +1,13 @@
 package ru.erminson.lc.service.impl;
 
 import org.springframework.stereotype.Service;
+import ru.erminson.lc.model.exception.EntityNotFoundException;
 import ru.erminson.lc.model.entity.Student;
-import ru.erminson.lc.model.exception.IllegalInitialDataException;
 import ru.erminson.lc.repository.StudentRepository;
 import ru.erminson.lc.service.StudentService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -17,31 +18,29 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public boolean addStudent(String name) {
-        return studentRepository.addStudent(name);
-
+    public boolean add(String name) {
+        return studentRepository.save(name);
     }
 
     @Override
-    public Student getStudentByName(String name) {
-        try {
-            return studentRepository.getStudentByName(name);
-        } catch (Exception e) {
-            return null;
-        }
+    public Student findById(long id) {
+        Optional<Student> student = studentRepository.findById(id);
+        return student.orElseThrow(() -> new EntityNotFoundException(Student.class, "id", String.valueOf(id)));
     }
 
     @Override
-    public List<Student> getAllStudents() {
-        return studentRepository.getAllStudents();
+    public Student findByName(String name) {
+        Optional<Student> student = studentRepository.findByName(name);
+        return student.orElseThrow(() -> new EntityNotFoundException(Student.class, "name", name));
     }
 
     @Override
-    public boolean removeStudent(String name) {
-        try {
-            return studentRepository.removeStudent(name);
-        } catch (IllegalInitialDataException e) {
-            return false;
-        }
+    public List<Student> findAll() {
+        return studentRepository.findAll();
+    }
+
+    @Override
+    public void deleteByName(String name) {
+        studentRepository.deleteByName(name);
     }
 }

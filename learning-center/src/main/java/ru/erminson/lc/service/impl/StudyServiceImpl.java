@@ -49,21 +49,21 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public boolean addStudentByName(String name) {
-        return studentService.addStudent(name);
+        return studentService.add(name);
     }
 
     @Override
     public boolean removeStudentByName(String name) {
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         recordBookService.dismissStudentFromCourse(student);
-        studentService.removeStudent(name);
+        studentService.deleteByName(name);
 
         return true;
     }
 
     @Override
     public boolean enrollStudentOnCourse(String name, String courseTitle) {
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         Course course = courseService.getCourseByTitle(courseTitle);
         if (student == null || course == null) {
             log.error("Student or record book not found: {} {}", name, courseTitle);
@@ -75,7 +75,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public boolean dismissStudentFromCourse(String name) {
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         if (student == null) {
             log.error("Student not found: {}", name);
             return false;
@@ -90,7 +90,7 @@ public class StudyServiceImpl implements StudyService {
             return false;
         }
 
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         // TODO: Create method for getting recordbook by studentId/studentName
         RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
         if (student == null || recordBook == null) {
@@ -124,7 +124,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+        return studentService.findAll();
     }
 
     @Override
@@ -189,7 +189,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public int getDaysUntilEndOfCourseByStudentName(String name, LocalDate nowDate) {
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         if (student == null) {
             return 0;
         }
@@ -225,7 +225,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public boolean canStudentCompleteCourseByStudentName(String name, LocalDate nowDate) {
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         if (student == null) {
             log.error("Student not found: {}", name);
             return false;
@@ -256,7 +256,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public StudentReport getStudentReportByStudentName(String name, LocalDate nowDate) {
-        Student student = studentService.getStudentByName(name);
+        Student student = studentService.findByName(name);
         // TODO: Exception
         if (student == null) {
             log.error("Student not found: {}", name);

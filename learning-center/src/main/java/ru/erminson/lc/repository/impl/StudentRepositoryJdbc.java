@@ -4,95 +4,80 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import ru.erminson.lc.mappers.StudentRowMapper;
 import ru.erminson.lc.model.entity.Student;
-import ru.erminson.lc.model.exception.IllegalInitialDataException;
 import ru.erminson.lc.repository.StudentRepository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class StudentRepositoryJdbc implements StudentRepository {
-    private static final String ID_COLUMN = "ID";
-    private static final String NAME_COLUMN = "NAME";
-
     private static final String GET_ALL_STUDENT_SQL = String.format(
             "SELECT %s, %s FROM STUDENT;",
-            ID_COLUMN, NAME_COLUMN
+            StudentRowMapper.ID_COLUMN, StudentRowMapper.NAME_COLUMN
     );
     private static final String ADD_STUDENT_SQL = "INSERT INTO STUDENT (NAME) VALUES (?)";
     private static final String DELETE_STUDENT_BY_NAME_SQL = "DELETE FROM STUDENT WHERE NAME = ?";
     private static final String GET_STUDENT_BY_NAME_SQL = "SELECT ID, NAME FROM STUDENT WHERE NAME = ?";
+    private static final String GET_STUDENT_BY_ID_SQL = "SELECT id, name FROM student WHERE id = ?";
 
     private final JdbcTemplate jdbcTemplate;
+    private final StudentRowMapper studentRowMapper;
 
-    public StudentRepositoryJdbc(JdbcTemplate jdbcTemplate) {
+    public StudentRepositoryJdbc(JdbcTemplate jdbcTemplate, StudentRowMapper studentRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.studentRowMapper = studentRowMapper;
     }
 
     @Override
-    public boolean addStudent(String name) {
+    public boolean save(String name) {
         try {
             jdbcTemplate.update(ADD_STUDENT_SQL, name);
             log.debug("Student: {} was added", name);
+            return true;
         } catch (DataIntegrityViolationException e) {
-            log.error("Student: {} hasn't added. {}", name, e.getMessage());
+            log.debug("Student: {} wasn't added. {}", name, e.getMessage());
             return false;
         }
-
-        return true;
     }
 
     @Override
-    public boolean removeStudent(String name) throws IllegalInitialDataException {
-        int deleteCount = jdbcTemplate.update(DELETE_STUDENT_BY_NAME_SQL, name);
-        if (deleteCount == 0) {
-            log.error("Student: {} hasn't removed.", name);
-            throw new IllegalInitialDataException("Student: " + name + " doesn't exist");
-        }
-
-        log.debug("Student: {} was removed", name);
-        return true;
+    public List<Student> findAll() {
+        return jdbcTemplate.query(GET_ALL_STUDENT_SQL, studentRowMapper);
     }
 
     @Override
-    public Student getStudentByName(String name) throws IllegalInitialDataException {
+    public Optional<Student> findById(long id) {
+        Student student = null;
         try {
-            Student student = jdbcTemplate.queryForObject(GET_STUDENT_BY_NAME_SQL, new StudentRowMapper(), name);
-            log.debug("Student: {} was found.", name);
-            return student;
+            student = jdbcTemplate.queryForObject(GET_STUDENT_BY_ID_SQL, studentRowMapper, id);
+            log.debug("Student with id: {} was found", id);
         } catch (EmptyResultDataAccessException e) {
-            log.error("Student: {} wasn't found.", name);
-            throw new IllegalInitialDataException(String.format("Student '%s' not found", name));
+            log.debug("Student with id: {} wasn't found", id);
         }
+
+        return Optional.ofNullable(student);
     }
 
     @Override
-    public List<Student> getAllStudents() {
-        return jdbcTemplate.query(GET_ALL_STUDENT_SQL, new StudentRowMapper());
-    }
-
-    @Override
-    public boolean isExistsStudent(String name) {
+    public Optional<Student> findByName(String name) {
+        Student student = null;
         try {
-            getStudentByName(name);
-        } catch (IllegalInitialDataException e) {
-            return false;
+            student = jdbcTemplate.queryForObject(GET_STUDENT_BY_NAME_SQL, studentRowMapper, name);
+            log.debug("Student with name: {} was found", name);
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("Student with name: {} wasn't found", name);
         }
 
-        return true;
+        return Optional.ofNullable(student);
     }
 
-    private static class StudentRowMapper implements RowMapper<Student> {
-        @Override
-        public Student mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Student student = new Student();
-            student.setId(rs.getLong(ID_COLUMN));
-            student.setName(rs.getString(NAME_COLUMN));
-
-            return student;
-        }
+    @Override
+    public boolean deleteByName(String name) {
+        int deleteCount = jdbcTemplate.update(DELETE_STUDENT_BY_NAME_SQL, name);
+        boolean deleteResult = deleteCount != 0;
+        log.debug("Delete student by name: {}. Result: {}", name, deleteResult);
+        return deleteResult;
     }
 }

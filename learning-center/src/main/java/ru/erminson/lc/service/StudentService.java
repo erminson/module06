@@ -5,8 +5,9 @@ import ru.erminson.lc.model.entity.Student;
 import java.util.List;
 
 public interface StudentService {
-    boolean addStudent(String name);
-    Student getStudentByName(String name);
-    List<Student> getAllStudents();
-    boolean removeStudent(String name);
+    boolean add(String name);
+    Student findById(long id);
+    Student findByName(String name);
+    List<Student> findAll();
+    void deleteByName(String name);
 }

@@ -1,12 +1,13 @@
 package ru.erminson.lc.repository.impl;
 
 import ru.erminson.lc.model.entity.Student;
-import ru.erminson.lc.model.exception.IllegalInitialDataException;
 import ru.erminson.lc.repository.StudentRepository;
 import ru.erminson.logging.annotation.EnableCustomAOP;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class StudentRepositoryImpl implements StudentRepository {
     private final List<Student> students;
@@ -21,7 +22,7 @@ public class StudentRepositoryImpl implements StudentRepository {
 
     @Override
     @EnableCustomAOP
-    public boolean addStudent(String name) {
+    public boolean save(String name) {
         Student student = new Student(name);
         if (students.contains(student)) {
             return false;
@@ -30,28 +31,26 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public boolean removeStudent(String name) throws IllegalInitialDataException {
-        Student student = getStudentByName(name);
-        return students.remove(student);
+    public boolean deleteByName(String name) {
+        Optional<Student> student = findByName(name);
+        Student s = student.orElse(null);
+        return Objects.nonNull(s) && students.remove(s);
     }
 
     @Override
-    public Student getStudentByName(String name) throws IllegalInitialDataException {
+    public Optional<Student> findById(long id) {
+        throw new UnsupportedOperationException("findById: not supported yet");
+    }
+
+    @Override
+    public Optional<Student> findByName(String name) {
         return students.stream()
                 .filter(student -> student.getName().equals(name))
-                .findFirst()
-                .orElseThrow(IllegalInitialDataException::new);
+                .findFirst();
     }
 
     @Override
-    public List<Student> getAllStudents() {
+    public List<Student> findAll() {
         return students;
-    }
-
-    @Override
-    public boolean isExistsStudent(String name) {
-        return students.stream()
-                .map(Student::getName)
-                .anyMatch(n -> n.equals(name));
     }
 }
