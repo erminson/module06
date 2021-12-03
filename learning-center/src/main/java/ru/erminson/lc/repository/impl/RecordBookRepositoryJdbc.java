@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
+@Repository
 public class RecordBookRepositoryJdbc implements RecordBookRepository {
     private static final String RECORD_BOOK_ID_COLUMN = "RECORD_BOOK_ID";
     private static final String STUDENT_ID_COLUMN = "STUDENT_ID";

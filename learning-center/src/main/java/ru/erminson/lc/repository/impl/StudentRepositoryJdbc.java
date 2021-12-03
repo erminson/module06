@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 import ru.erminson.lc.mappers.StudentRowMapper;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.repository.StudentRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Repository
 public class StudentRepositoryJdbc implements StudentRepository {
     private static final String GET_ALL_STUDENT_SQL = String.format(
             "SELECT %s, %s FROM STUDENT;",

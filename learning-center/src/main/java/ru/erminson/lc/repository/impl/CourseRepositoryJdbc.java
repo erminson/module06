@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCountCallbackHandler;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.Topic;
@@ -23,6 +24,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 @Slf4j
+@Repository
 public class CourseRepositoryJdbc implements CourseRepository {
     private final JdbcTemplate jdbcTemplate;
     private SqlFactory sqlFactory;
