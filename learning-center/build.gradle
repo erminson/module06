@@ -34,6 +34,9 @@ assemble.dependsOn deployTomcat
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    runtimeOnly 'com.h2database:h2:1.4.200'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
@@ -41,4 +44,12 @@ dependencies {
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage'
+    }
+}
+
+test {
+    useJUnitPlatform()
 }

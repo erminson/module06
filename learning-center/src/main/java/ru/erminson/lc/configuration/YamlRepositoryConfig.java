@@ -1,6 +1,6 @@
 package ru.erminson.lc.configuration;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.erminson.lc.repository.CourseRepository;
@@ -10,9 +10,9 @@ import ru.erminson.lc.utils.CourseRepositoryYamlInitializer;
 import ru.erminson.lc.utils.RecordBookRepositoryInitializer;
 import ru.erminson.lc.utils.StudentRepositoryYamlInitializer;
 
-@Slf4j
 @Configuration
-public class AppConfig {
+@ConditionalOnProperty(value = "db.type", havingValue = "yaml")
+public class YamlRepositoryConfig {
     @Bean
     public CourseRepository createCourseRepository() {
         return CourseRepositoryYamlInitializer.create();

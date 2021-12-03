@@ -2,6 +2,7 @@ package ru.erminson.lc.repository.impl;
 
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
+import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
 
 import java.util.ArrayList;
@@ -25,6 +26,20 @@ public class RecordBookRepositoryImpl implements RecordBookRepository {
     public boolean addStudentWithRecordBook(Student student, RecordBook recordBook) {
         storage.putIfAbsent(student, recordBook);
         return true;
+    }
+
+    @Override
+    public boolean rateTopic(TopicScore topicScore, int score) {
+        throw new UnsupportedOperationException("Method not yet implemented");
+    }
+
+    @Override
+    public RecordBook getRecordBook(String studentName) {
+        Student student = storage.keySet().stream()
+                .filter(s -> s.getName().equals(studentName))
+                .findFirst()
+                .orElseGet(() -> new Student(studentName));
+        return storage.get(student);
     }
 
     @Override

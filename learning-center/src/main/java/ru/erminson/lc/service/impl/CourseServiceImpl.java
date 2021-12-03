@@ -1,6 +1,5 @@
 package ru.erminson.lc.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.Topic;
@@ -15,7 +14,6 @@ import java.util.List;
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
 
-    @Autowired
     public CourseServiceImpl(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }

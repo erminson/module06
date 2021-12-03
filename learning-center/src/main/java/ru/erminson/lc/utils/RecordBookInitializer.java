@@ -10,22 +10,36 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RecordBookInitializer {
-    private static final double TEACHING_HOURS_PER_DAY = 8;
-
     private RecordBookInitializer() {
         throw new IllegalStateException("RecordBookInitializer utility class");
     }
 
-    public static RecordBook createRecordBookByCourseAndStartDate(Course course, LocalDate startDate) {
+    public static RecordBook createRecordBookByCourseAndStartDate(long recordBookId, Course course, LocalDate startDate) {
         String courseTitle = course.getTitle();
-        List<TopicScore> topics = course.getTopics().stream()
-                .map(RecordBookInitializer::createTopic)
+
+        List<Topic> topics = course.getTopics();
+        List<TopicScore> topicScores = IntStream.range(0, topics.size())
+                .boxed()
+                .collect(Collectors.toMap(Function.identity(), topics::get))
+                .entrySet().stream().map(e -> TopicScore.create((long)e.getKey() + 1, e.getValue()))
                 .collect(Collectors.toList());
 
-        return new RecordBook(courseTitle, startDate, topics);
+        return new RecordBook(recordBookId, course.getId(), courseTitle, startDate, topicScores);
+    }
+
+
+    public static RecordBook createRecordBookByCourseAndStartDate(Course course, LocalDate startDate) {
+        return createRecordBookByCourseAndStartDate(0, course, startDate);
+    }
+
+    public static RecordBook createRecordBookByCourse(long recordBookId, Course course) {
+        LocalDate startDate = LocalDate.now().plusDays(1);
+        return createRecordBookByCourseAndStartDate(recordBookId, course, startDate);
     }
 
     public static RecordBook createRecordBookByCourse(Course course) {
@@ -47,12 +61,6 @@ public class RecordBookInitializer {
                 )
                 .collect(Collectors.toList());
 
-        return new RecordBook(courseTitle, localDate, topics);
-    }
-
-    private static TopicScore createTopic(Topic topic) {
-        String topicTitle = topic.getTitle();
-        Duration durationInDays = Duration.ofDays((long) Math.ceil(topic.getDurationInHours() / TEACHING_HOURS_PER_DAY));
-        return new TopicScore(topicTitle, durationInDays);
+        return new RecordBook(0, 0, courseTitle, localDate, topics);
     }
 }

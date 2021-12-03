@@ -1,10 +1,10 @@
 package ru.erminson.lc.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
+import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
 import ru.erminson.lc.service.RecordBookService;
 import ru.erminson.lc.utils.RecordBookInitializer;
@@ -17,7 +17,6 @@ import java.util.List;
 public class RecordBookServiceImpl implements RecordBookService {
     private final RecordBookRepository recordBookRepository;
 
-    @Autowired
     public RecordBookServiceImpl(RecordBookRepository recordBookRepository) {
         this.recordBookRepository = recordBookRepository;
     }
@@ -29,26 +28,28 @@ public class RecordBookServiceImpl implements RecordBookService {
     }
 
     @Override
-    public RecordBook getRecordBookByStudent(Student student) {
-        if (recordBookRepository.isStudentOnCourse(student)) {
-            return recordBookRepository.getRecordBook(student);
-        }
+    public RecordBook getRecordBookByStudentName(String studentName) {
+        return recordBookRepository.getRecordBook(studentName);
+    }
 
-        return null;
+    @Override
+    public RecordBook getRecordBookByStudent(Student student) {
+        return recordBookRepository.getRecordBook(student);
     }
 
     @Override
     public boolean dismissStudentFromCourse(Student student) {
-        if (recordBookRepository.isStudentOnCourse(student)) {
-            return recordBookRepository.removeStudentFromCourse(student);
-        }
-
-        return false;
+        return recordBookRepository.removeStudentFromCourse(student);
     }
 
     @Override
     public List<Student> getAllStudentsOnCourses() {
         return recordBookRepository.getAllStudents();
+    }
+
+    @Override
+    public boolean rateTopic(TopicScore topicScore, int score) {
+        return recordBookRepository.rateTopic(topicScore, score);
     }
 
     @Override
@@ -58,7 +59,12 @@ public class RecordBookServiceImpl implements RecordBookService {
             return 0;
         }
 
-        return (int)recordBook.getTopics().stream()
+        return getNumberRatedTopics(recordBook);
+    }
+
+    @Override
+    public int getNumberRatedTopics(RecordBook recordBook) {
+        return (int) recordBook.getTopics().stream()
                 .filter(topicScore -> topicScore.getScore() != 0)
                 .count();
     }
@@ -67,12 +73,22 @@ public class RecordBookServiceImpl implements RecordBookService {
     public int getNumberTopics(Student student) {
         RecordBook recordBook = getRecordBookByStudent(student);
 
+        return getNumberTopics(recordBook);
+    }
+
+    @Override
+    public int getNumberTopics(RecordBook recordBook) {
         return recordBook.getTopics().size();
     }
 
     @Override
     public int getDaysUntilEndOfCourseByStudent(Student student, LocalDate nowDate) {
         RecordBook recordBook = getRecordBookByStudent(student);
+        return getDaysUntilEndOfCourseByStudent(recordBook, nowDate);
+    }
+
+    @Override
+    public int getDaysUntilEndOfCourseByStudent(RecordBook recordBook, LocalDate nowDate) {
         LocalDate endOfCourseDate = recordBook.getEndDate();
 
         if (nowDate.isAfter(endOfCourseDate)) {

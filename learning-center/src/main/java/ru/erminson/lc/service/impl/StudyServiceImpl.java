@@ -20,10 +20,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +29,8 @@ public class StudyServiceImpl implements StudyService {
     private static final int PASSING_SCORE = 75;
     private static final int MIN_SCORE = 1;
     private static final int MAX_SCORE = 100;
+
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     private final StudentService studentService;
     private final RecordBookService recordBookService;
@@ -92,6 +91,7 @@ public class StudyServiceImpl implements StudyService {
         }
 
         Student student = studentService.getStudentByName(name);
+        // TODO: Create method for getting recordbook by studentId/studentName
         RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
         if (student == null || recordBook == null) {
             log.error("Student or record book not found: {} {}", name, topicTitle);
@@ -101,12 +101,12 @@ public class StudyServiceImpl implements StudyService {
         if (recordBook.isExistsTopic(topicTitle)) {
             LocalDate endDate = recordBook.getEndDateTopic(topicTitle);
             if (endDate.isAfter(nowDate)) {
+                // TODO: Add log.error
                 return false;
             }
 
             TopicScore topicScore = recordBook.getTopicScoreByTitle(topicTitle);
-            topicScore.setScore(score);
-            return true;
+            return recordBookService.rateTopic(topicScore, score);
         }
 
         return false;
@@ -119,13 +119,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public RecordBook getRecordBookByStudentName(String name) {
-        Student student = studentService.getStudentByName(name);
-        if (student == null) {
-            log.error("Student not found: {}", name);
-            return null;
-        }
-
-        return recordBookService.getRecordBookByStudent(student);
+        return recordBookService.getRecordBookByStudentName(name);
     }
 
     @Override
@@ -179,7 +173,7 @@ public class StudyServiceImpl implements StudyService {
         List<Student> students = recordBookService.getAllStudentsOnCourses();
 
         return students.stream()
-                .filter(student -> canStudentCompleteCourseByStudentName(student.getName(), nowDate))
+                .filter(student -> canStudentCompleteCourseByStudentName(student, nowDate))
                 .collect(Collectors.toList());
     }
 
@@ -208,6 +202,27 @@ public class StudyServiceImpl implements StudyService {
         return getDaysUntilEndOfCourseByStudentName(name, LocalDate.now());
     }
 
+    private boolean canStudentCompleteCourseByStudentName(RecordBook recordBook, LocalDate nowDate) {
+        int daysLeft = recordBookService.getDaysUntilEndOfCourseByStudent(recordBook, nowDate);
+
+        if (daysLeft == 0) {
+            return false;
+        }
+
+        int numberTopicsLeftBeRated =
+                recordBookService.getNumberTopics(recordBook) - recordBookService.getNumberRatedTopics(recordBook);
+        if (daysLeft < numberTopicsLeftBeRated) {
+            return false;
+        }
+
+        return recordBook.getAverageScoreInBestCase() >= PASSING_SCORE;
+    }
+
+    private boolean canStudentCompleteCourseByStudentName(Student student, LocalDate nowDate) {
+        RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
+        return canStudentCompleteCourseByStudentName(recordBook, nowDate);
+    }
+
     @Override
     public boolean canStudentCompleteCourseByStudentName(String name, LocalDate nowDate) {
         Student student = studentService.getStudentByName(name);
@@ -219,18 +234,7 @@ public class StudyServiceImpl implements StudyService {
         RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
         // TODO: check recordBook for null
 
-        int daysLeft = getDaysUntilEndOfCourseByStudentName(student.getName(), nowDate);
-        if (daysLeft == 0) {
-            return false;
-        }
-
-        int numberTopicsLeftBeRated =
-                recordBookService.getNumberTopics(student) - recordBookService.getNumberRatedTopics(student);
-        if (daysLeft < numberTopicsLeftBeRated) {
-            return false;
-        }
-
-        return recordBook.getAverageScoreInBestCase() >= PASSING_SCORE;
+        return canStudentCompleteCourseByStudentName(recordBook, nowDate);
     }
 
     @Override
@@ -238,26 +242,28 @@ public class StudyServiceImpl implements StudyService {
         return canStudentCompleteCourseByStudentName(name, LocalDate.now());
     }
 
+
+    public StudentReport getStudentReportByStudentAndDate(Student student, LocalDate nowDate) {
+        RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
+        boolean ability = canStudentCompleteCourseByStudentName(recordBook, nowDate);
+
+        return StudentReportFactory.create(student, recordBook, ability);
+    }
+
+    public StudentReport getStudentReportByStudent(Student student) {
+        return getStudentReportByStudentAndDate(student, LocalDate.now());
+    }
+
     @Override
     public StudentReport getStudentReportByStudentName(String name, LocalDate nowDate) {
         Student student = studentService.getStudentByName(name);
+        // TODO: Exception
         if (student == null) {
             log.error("Student not found: {}", name);
             return null;
         }
 
-        //
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            log.error(e.getMessage());
-            Thread.currentThread().interrupt();
-        }
-
-        boolean ability = canStudentCompleteCourseByStudentName(name, nowDate);
-        RecordBook recordBook = recordBookService.getRecordBookByStudent(student);
-
-        return StudentReportFactory.create(student, recordBook, ability);
+        return getStudentReportByStudentAndDate(student, nowDate);
     }
 
     @Override
@@ -269,7 +275,7 @@ public class StudyServiceImpl implements StudyService {
     public void saveStudentReports(LocalDate nowDate) {
         List<Student> students = getAllStudentsOnCourses();
         List<StudentReport> reports = students.stream()
-                .map(student -> getStudentReportByStudentName(student.getName(), nowDate))
+                .map(student -> getStudentReportByStudentAndDate(student, nowDate))
                 .collect(Collectors.toList());
 
         ReportSaverUtils.saveStudentReports(reports);
@@ -278,12 +284,11 @@ public class StudyServiceImpl implements StudyService {
     @Override
     public void saveStudentReportsWithMultithreading() {
         List<Student> students = getAllStudentsOnCourses();
-        ExecutorService executorService = Executors.newFixedThreadPool(students.size());
         List<Future<StudentReport>> futureReports = new ArrayList<>();
         try {
             for (Student student : students) {
                 Future<StudentReport> futureReport = executorService.submit(
-                        () -> getStudentReportByStudentName(student.getName())
+                        () -> getStudentReportByStudent(student)
                 );
                 futureReports.add(futureReport);
             }
