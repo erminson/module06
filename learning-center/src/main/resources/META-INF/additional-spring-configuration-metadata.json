@@ -9,5 +9,15 @@
       "name": "topic.duration",
       "type": "java.lang.String",
       "description": "Description for topic.duration."
+    },
+    {
+      "name": "db.type",
+      "type": "java.lang.String",
+      "description": "Description for db.type."
+    },
+    {
+      "name": "spring.datasource.jdbc-url",
+      "type": "java.lang.String",
+      "description": "Description for spring.datasource.jdbc-url."
     }
   ] }
