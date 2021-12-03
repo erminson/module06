@@ -2,10 +2,7 @@ package ru.erminson.lc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.stereotype.Component;
-import ru.erminson.lc.configuration.TopicScoreConfig;
 import ru.erminson.lc.model.dto.report.StudentReport;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;
@@ -17,10 +14,9 @@ import ru.erminson.lc.view.impl.ConsoleView;
 import java.util.List;
 import java.util.stream.IntStream;
 
-//@Profile("demo")
 @Slf4j
-@Component
-@EnableConfigurationProperties({TopicScoreConfig.class})
+//@Component
+//@EnableConfigurationProperties({TopicScoreConfig.class})
 public class DemoCommandLineRunner implements CommandLineRunner {
     private final AnnotationConfigApplicationContext context;
 
