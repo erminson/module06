@@ -6,6 +6,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import ru.erminson.lc.mappers.StudentRowMapper;
 import ru.erminson.lc.repository.CourseRepository;
 import ru.erminson.lc.repository.RecordBookRepository;
 import ru.erminson.lc.repository.StudentRepository;
@@ -35,8 +36,8 @@ public class JdbcRepositoryConfig {
     }
 
     @Bean
-    public StudentRepository createStudentRepository(JdbcTemplate jdbcTemplate) {
-        return new StudentRepositoryJdbc(jdbcTemplate);
+    public StudentRepository createStudentRepository(JdbcTemplate jdbcTemplate, StudentRowMapper studentRowMapper) {
+        return new StudentRepositoryJdbc(jdbcTemplate, studentRowMapper);
     }
 
     @Bean
