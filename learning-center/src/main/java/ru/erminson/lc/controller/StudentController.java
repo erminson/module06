@@ -1,9 +1,6 @@
 package ru.erminson.lc.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.erminson.lc.model.exception.EntityNotFoundException;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.service.StudentService;
@@ -28,5 +25,10 @@ public class StudentController {
     @GetMapping("/{id}")
     public Student getStudent(@PathVariable long id) throws EntityNotFoundException {
         return studentService.findById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteStudent(@PathVariable long id) throws EntityNotFoundException {
+        studentService.deleteById(id);
     }
 }
