@@ -31,6 +31,11 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
+    public boolean deleteById(long id) {
+        throw new UnsupportedOperationException("deleteById: not supported yet");
+    }
+
+    @Override
     public boolean deleteByName(String name) {
         Optional<Student> student = findByName(name);
         Student s = student.orElse(null);

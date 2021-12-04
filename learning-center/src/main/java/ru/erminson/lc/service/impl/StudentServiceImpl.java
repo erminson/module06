@@ -40,6 +40,14 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public void deleteById(long id) {
+        boolean deleteResult = studentRepository.deleteById(id);
+        if (!deleteResult) {
+            throw  new EntityNotFoundException(Student.class, "id", String.valueOf(id));
+        }
+    }
+
+    @Override
     public void deleteByName(String name) {
         studentRepository.deleteByName(name);
     }

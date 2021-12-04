@@ -10,5 +10,6 @@ public interface StudentRepository {
     List<Student> findAll();
     Optional<Student> findById(long id);
     Optional<Student> findByName(String name);
+    boolean deleteById(long id);
     boolean deleteByName(String name);
 }

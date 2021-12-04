@@ -23,6 +23,7 @@ public class StudentRepositoryJdbc implements StudentRepository {
     private static final String DELETE_STUDENT_BY_NAME_SQL = "DELETE FROM STUDENT WHERE NAME = ?";
     private static final String GET_STUDENT_BY_NAME_SQL = "SELECT ID, NAME FROM STUDENT WHERE NAME = ?";
     private static final String GET_STUDENT_BY_ID_SQL = "SELECT id, name FROM student WHERE id = ?";
+    private static final String DELETE_STUDENT_BY_ID_SQL = "DELETE FROM STUDENT WHERE ID = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final StudentRowMapper studentRowMapper;
@@ -73,6 +74,14 @@ public class StudentRepositoryJdbc implements StudentRepository {
         }
 
         return Optional.ofNullable(student);
+    }
+
+    @Override
+    public boolean deleteById(long id) {
+        int deleteCount = jdbcTemplate.update(DELETE_STUDENT_BY_ID_SQL, id);
+        boolean deleteResult = deleteCount != 0;
+        log.debug("Delete student by id: {}. Result: {}", id, deleteResult);
+        return deleteResult;
     }
 
     @Override
