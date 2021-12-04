@@ -33,48 +33,48 @@ class StudentRepositoryJdbcTest {
 
     @Test
     void shouldBeTreeStudentsTest() {
-        studentRepositoryJdbc.addStudent(STUDENT1.getName());
-        studentRepositoryJdbc.addStudent(STUDENT2.getName());
-        studentRepositoryJdbc.addStudent(STUDENT3.getName());
-        assertEquals(3, studentRepositoryJdbc.getAllStudents().size());
+        studentRepositoryJdbc.save(STUDENT1.getName());
+        studentRepositoryJdbc.save(STUDENT2.getName());
+        studentRepositoryJdbc.save(STUDENT3.getName());
+        assertEquals(3, studentRepositoryJdbc.findAll().size());
     }
 
     @Test
     void shouldBeFalseWhenAddStudentTwice() {
         assertAll(
-                () -> assertThat(studentRepositoryJdbc.addStudent(STUDENT1.getName()), is(true)),
-                () -> assertThat(studentRepositoryJdbc.addStudent(STUDENT1.getName()), is(false))
+                () -> assertThat(studentRepositoryJdbc.save(STUDENT1.getName()), is(true)),
+                () -> assertThat(studentRepositoryJdbc.save(STUDENT1.getName()), is(false))
         );
     }
 
     @Test
     void shouldBeTrueWhenRemoveOneStudent() {
-        studentRepositoryJdbc.addStudent(STUDENT1.getName());
-        studentRepositoryJdbc.addStudent(STUDENT2.getName());
-        studentRepositoryJdbc.addStudent(STUDENT3.getName());
+        studentRepositoryJdbc.save(STUDENT1.getName());
+        studentRepositoryJdbc.save(STUDENT2.getName());
+        studentRepositoryJdbc.save(STUDENT3.getName());
 
         assertAll(
-                () -> assertThat(studentRepositoryJdbc.removeStudent(STUDENT1.getName()), is(true)),
-                () -> assertThat(studentRepositoryJdbc.getAllStudents(), hasSize(2))
+                () -> assertThat(studentRepositoryJdbc.deleteByName(STUDENT1.getName()), is(true)),
+                () -> assertThat(studentRepositoryJdbc.findAll(), hasSize(2))
         );
     }
 
     @Test
     void shouldBeExceptionWhenRemoveNotExistsStudent() {
-        assertThrows(IllegalInitialDataException.class, () -> studentRepositoryJdbc.removeStudent(STUDENT1.getName()));
+        assertThrows(IllegalInitialDataException.class, () -> studentRepositoryJdbc.deleteByName(STUDENT1.getName()));
     }
 
     @Test
     void shouldBeZeroStudentsWhenRemoveAll() {
-        studentRepositoryJdbc.addStudent(STUDENT1.getName());
-        studentRepositoryJdbc.addStudent(STUDENT2.getName());
-        studentRepositoryJdbc.addStudent(STUDENT3.getName());
+        studentRepositoryJdbc.save(STUDENT1.getName());
+        studentRepositoryJdbc.save(STUDENT2.getName());
+        studentRepositoryJdbc.save(STUDENT3.getName());
 
         assertAll(
-                () -> assertThat(studentRepositoryJdbc.removeStudent(STUDENT1.getName()), is(true)),
-                () -> assertThat(studentRepositoryJdbc.removeStudent(STUDENT2.getName()), is(true)),
-                () -> assertThat(studentRepositoryJdbc.removeStudent(STUDENT3.getName()), is(true)),
-                () -> assertThat(studentRepositoryJdbc.getAllStudents(), hasSize(0))
+                () -> assertThat(studentRepositoryJdbc.deleteByName(STUDENT1.getName()), is(true)),
+                () -> assertThat(studentRepositoryJdbc.deleteByName(STUDENT2.getName()), is(true)),
+                () -> assertThat(studentRepositoryJdbc.deleteByName(STUDENT3.getName()), is(true)),
+                () -> assertThat(studentRepositoryJdbc.findAll(), hasSize(0))
         );
     }
 
@@ -85,7 +85,7 @@ class StudentRepositoryJdbcTest {
 
     @Test
     void isExistStudentTestMethod() {
-        studentRepositoryJdbc.addStudent(STUDENT1.getName());
+        studentRepositoryJdbc.save(STUDENT1.getName());
 
         assertAll(
                 () -> assertThat(studentRepositoryJdbc.isExistsStudent(STUDENT1.getName()), is(true)),

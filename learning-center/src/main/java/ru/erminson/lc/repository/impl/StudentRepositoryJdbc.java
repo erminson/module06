@@ -4,12 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.erminson.lc.mappers.StudentRowMapper;
+import ru.erminson.lc.model.dto.request.StudentRequest;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.repository.StudentRepository;
 
+import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -42,6 +48,24 @@ public class StudentRepositoryJdbc implements StudentRepository {
         } catch (DataIntegrityViolationException e) {
             log.debug("Student: {} wasn't added. {}", name, e.getMessage());
             return false;
+        }
+    }
+
+    @Override
+    @Transactional
+    public Optional<Student> save(StudentRequest studentRequest) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        try {
+            jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(ADD_STUDENT_SQL, new String[]{"ID"});
+                ps.setString(1, studentRequest.getName());
+                return ps;
+            }, keyHolder);
+
+            long id = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            return findById(id);
+        } catch (Exception e) {
+            return Optional.empty();
         }
     }
 

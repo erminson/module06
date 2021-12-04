@@ -61,8 +61,8 @@ class RecordBookRepositoryJdbcTest {
         this.courseRepositoryJdbc.add(COURSE1);
         this.courseRepositoryJdbc.add(COURSE2);
 
-        this.studentRepositoryJdbc.addStudent(STUDENT1.getName());
-        this.studentRepositoryJdbc.addStudent(STUDENT2.getName());
+        this.studentRepositoryJdbc.save(STUDENT1.getName());
+        this.studentRepositoryJdbc.save(STUDENT2.getName());
     }
 
     @Test

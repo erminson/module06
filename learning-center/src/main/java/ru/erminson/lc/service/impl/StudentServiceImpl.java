@@ -1,8 +1,10 @@
 package ru.erminson.lc.service.impl;
 
 import org.springframework.stereotype.Service;
-import ru.erminson.lc.model.exception.EntityNotFoundException;
+import ru.erminson.lc.model.dto.request.StudentRequest;
 import ru.erminson.lc.model.entity.Student;
+import ru.erminson.lc.model.exception.EntityHasAlreadyBeenCreated;
+import ru.erminson.lc.model.exception.EntityNotFoundException;
 import ru.erminson.lc.repository.StudentRepository;
 import ru.erminson.lc.service.StudentService;
 
@@ -19,7 +21,17 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public boolean add(String name) {
-        return studentRepository.save(name);
+        if (!studentRepository.save(name)) {
+            throw new EntityNotFoundException(String.class, "name", name);
+        }
+        return true;
+    }
+
+    @Override
+    public Student add(StudentRequest studentRequest) {
+        Optional<Student> studentOptional = studentRepository.save(studentRequest);
+        return studentOptional
+                .orElseThrow(() -> new EntityHasAlreadyBeenCreated(Student.class, "name", studentRequest.getName()));
     }
 
     @Override

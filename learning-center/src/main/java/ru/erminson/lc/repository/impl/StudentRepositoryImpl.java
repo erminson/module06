@@ -1,5 +1,6 @@
 package ru.erminson.lc.repository.impl;
 
+import ru.erminson.lc.model.dto.request.StudentRequest;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.repository.StudentRepository;
 import ru.erminson.logging.annotation.EnableCustomAOP;
@@ -28,6 +29,11 @@ public class StudentRepositoryImpl implements StudentRepository {
             return false;
         }
         return students.add(student);
+    }
+
+    @Override
+    public Optional<Student> save(StudentRequest studentRequest) {
+        throw new UnsupportedOperationException("save(StudentRequest): not support yet");
     }
 
     @Override
