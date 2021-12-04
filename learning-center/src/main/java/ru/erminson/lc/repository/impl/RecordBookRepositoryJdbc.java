@@ -5,40 +5,27 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.erminson.lc.mappers.StudentRecordBookExtractor;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
-import ru.erminson.lc.model.entity.Topic;
 import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Repository
 public class RecordBookRepositoryJdbc implements RecordBookRepository {
-    private static final String RECORD_BOOK_ID_COLUMN = "RECORD_BOOK_ID";
-    private static final String STUDENT_ID_COLUMN = "STUDENT_ID";
-    private static final String STUDENT_NAME_COLUMN = "STUDENT_NAME";
-    private static final String COURSE_ID_COLUMN = "COURSE_ID";
-    private static final String COURSE_TITLE_COLUMN = "COURSE_TITLE";
-    private static final String START_DATE_COLUMN = "START_DATE";
-    private static final String TOPIC_SCORE_ID_COLUMN = "TOPIC_SCORE_ID";
-    private static final String TOPIC_ID_COLUMN = "TOPIC_ID";
-    private static final String TOPIC_TITLE_COLUMN = "TOPIC_TITLE";
-    private static final String TOPIC_SCORE_COLUMN = "TOPIC_SCORE";
-    private static final String DURATION_IN_HOURS_COLUMN = "DURATION_IN_HOURS";
-    private static final String PRIORITY_COLUMN = "PRIORITY_HOURS";
-
     private static final String GET_ALL_RECORD_BOOKS_SQL = String.format(
             "SELECT\n" +
                     "       RB.ID               %s,\n" +
@@ -60,11 +47,12 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
                     "         JOIN TOPIC T ON T.ID = TS.TOPIC_ID\n" +
                     "         JOIN COURSE_TOPIC CT ON CT.TOPIC_ID = T.ID\n" +
                     "         JOIN COURSE C on C.ID = CT.COURSE_ID",
-            RECORD_BOOK_ID_COLUMN,
-            STUDENT_ID_COLUMN, STUDENT_NAME_COLUMN,
-            COURSE_ID_COLUMN, COURSE_TITLE_COLUMN, START_DATE_COLUMN,
-            TOPIC_SCORE_ID_COLUMN, TOPIC_ID_COLUMN, TOPIC_TITLE_COLUMN, TOPIC_SCORE_COLUMN,
-            DURATION_IN_HOURS_COLUMN, PRIORITY_COLUMN
+            StudentRecordBookExtractor.RECORD_BOOK_ID_COLUMN, StudentRecordBookExtractor.STUDENT_ID_COLUMN,
+            StudentRecordBookExtractor.STUDENT_NAME_COLUMN, StudentRecordBookExtractor.COURSE_ID_COLUMN,
+            StudentRecordBookExtractor.COURSE_TITLE_COLUMN, StudentRecordBookExtractor.START_DATE_COLUMN,
+            StudentRecordBookExtractor.TOPIC_SCORE_ID_COLUMN, StudentRecordBookExtractor.TOPIC_ID_COLUMN,
+            StudentRecordBookExtractor.TOPIC_TITLE_COLUMN, StudentRecordBookExtractor.TOPIC_SCORE_COLUMN,
+            StudentRecordBookExtractor.DURATION_IN_HOURS_COLUMN, StudentRecordBookExtractor.PRIORITY_COLUMN
     );
     private static final String GET_RECORD_BOOK_BY_STUDENT_NAME_SQL =
             String.format("%s\nWHERE S.NAME = ?", GET_ALL_RECORD_BOOKS_SQL);
@@ -91,7 +79,7 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
                             "S.NAME %s\n" +
                             "FROM RECORD_BOOK RB\n" +
                             "JOIN STUDENT S ON RB.STUDENT_ID = S.ID",
-                    STUDENT_ID_COLUMN, STUDENT_NAME_COLUMN
+                    StudentRecordBookExtractor.STUDENT_ID_COLUMN, StudentRecordBookExtractor.STUDENT_NAME_COLUMN
             );
 
     private static final String GET_RECORD_BOOK_ID_BY_STUDENT_ID =
@@ -190,7 +178,7 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     public RecordBook getRecordBook(String studentName) {
         Map<Student, RecordBook> map = jdbcTemplate.query(
                 GET_RECORD_BOOK_BY_STUDENT_NAME_SQL,
-                new StudentWithRecordBookExtractor(),
+                new StudentRecordBookExtractor(),
                 studentName
         );
 
@@ -243,47 +231,10 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     public List<Student> getAllStudents() {
         return jdbcTemplate.query(GET_ALL_STUDENTS_ON_COURSES, (rs, rowNum) -> {
             Student student = new Student();
-            student.setId(rs.getLong(STUDENT_ID_COLUMN));
-            student.setName(rs.getString(STUDENT_NAME_COLUMN));
+            student.setId(rs.getLong(StudentRecordBookExtractor.STUDENT_ID_COLUMN));
+            student.setName(rs.getString(StudentRecordBookExtractor.STUDENT_NAME_COLUMN));
 
             return student;
         });
-    }
-
-    private static class StudentWithRecordBookExtractor implements ResultSetExtractor<Map<Student, RecordBook>> {
-        @Override
-        public Map<Student, RecordBook> extractData(ResultSet rs) throws SQLException, DataAccessException {
-            Map<Student, RecordBook> map = new HashMap<>();
-
-            while (rs.next()) {
-                long studentId = rs.getLong(STUDENT_ID_COLUMN);
-                String name = rs.getString(STUDENT_NAME_COLUMN);
-                Student student = new Student(studentId, name);
-
-                if (!map.containsKey(student)) {
-                    long recordBookId = rs.getLong(RECORD_BOOK_ID_COLUMN);
-                    String courseTitle = rs.getString(COURSE_TITLE_COLUMN);
-                    LocalDate startDate = rs.getDate(START_DATE_COLUMN).toLocalDate();
-                    long courseId = rs.getLong(COURSE_ID_COLUMN);
-                    RecordBook recordBook = new RecordBook(recordBookId, courseId, courseTitle, startDate, new ArrayList<>());
-                    map.put(student, recordBook);
-                }
-
-                RecordBook recordBook = map.get(student);
-
-                long topicScoreId = rs.getLong(TOPIC_SCORE_ID_COLUMN);
-                long topicId = rs.getLong(TOPIC_ID_COLUMN);
-                String topicTitle = rs.getString(TOPIC_TITLE_COLUMN);
-                int score = rs.getInt(TOPIC_SCORE_COLUMN);
-                int durationInHours = rs.getInt(DURATION_IN_HOURS_COLUMN);
-                Topic topic = new Topic(topicId, topicTitle, durationInHours);
-
-                TopicScore topicScore = TopicScore.create(topicScoreId, score, topic);
-
-                recordBook.addTopic(topicScore);
-            }
-
-            return map;
-        }
     }
 }
