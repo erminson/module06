@@ -9,7 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.erminson.lc.mappers.StudentRecordBookExtractor;
+import ru.erminson.lc.mapper.StudentRecordBookExtractor;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;

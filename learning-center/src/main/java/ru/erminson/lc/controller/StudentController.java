@@ -1,6 +1,7 @@
 package ru.erminson.lc.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.erminson.lc.model.dto.request.StudentRequest;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("student")
+@RequestMapping("students")
 @Validated
 public class StudentController {
 
@@ -26,15 +27,17 @@ public class StudentController {
     }
 
     @PostMapping
-    @ResponseBody
     public ResponseEntity<StudentResponse> addStudent(
             @Valid @RequestBody StudentRequest studentRequest) throws EntityHasAlreadyBeenCreated {
+
+
+
         Student student = studentService.add(studentRequest);
         return ResponseEntity.ok(new StudentResponse(student.getId(), student.getName()));
     }
 
     @GetMapping
-    public List<StudentResponse> getStudents() {
+    public List<StudentResponse> getStudents(UsernamePasswordAuthenticationToken token) {
         return studentService.findAll().stream()
                 .map(student -> new StudentResponse(student.getId(), student.getName()))
                 .collect(Collectors.toList());
@@ -46,7 +49,8 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteStudent(@PathVariable long id) throws EntityNotFoundException {
+    public ResponseEntity<String> deleteStudent(@PathVariable long id) throws EntityNotFoundException {
         studentService.deleteById(id);
+        return ResponseEntity.ok("Student with id: " + id + " deleted with success");
     }
 }

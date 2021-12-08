@@ -1,9 +1,29 @@
-INSERT INTO STUDENT (NAME, CREATED_AT)
-VALUES ('Ivan', '2010-01-01 11:00:00+03'),
-       ('Peter', '2010-01-01 11:00:00+03'),
-       ('John', '2010-01-01 11:00:00+03');
+INSERT INTO role (name)
+VALUES ('ROLE_ADMIN'),
+       ('ROLE_TEACHER'),
+       ('STUDENT');
 
-INSERT INTO TOPIC (TITLE, DURATION_IN_HOURS)
+INSERT INTO user (login, password, name)
+VALUES ('admin1', '$2a$12$uV66DMJTnlReDUqlIsM5neJu0GLmE9cJzJxuAdHwpfaM6ANOiE7Uu', 'Admin1'),     -- admin1
+       ('teacher1', '$2a$12$bdvFkIYNBj.GjxFPwVUikOyCG5Gh0vTy6TCivQnu0GJf5xpJMgL46', 'Teacher1'), -- teacher1
+       ('student1', '$2a$10$rqtxo3EGCEd2AEJR2OWDle2ZgANo2qNRNsX8Tu8tr7h3KF1UVYrQi', 'Student1'), -- student1
+       ('student2', '$2a$12$HgCz/TdbB1rkr1HvBl5HbOdoBI5M6finENrq4gFvc/H67f6lFOLMK', 'Student2'), -- student2
+       ('student3', '$2a$12$HgCz/TdbB1rkr1HvBl5HbOdoBI5M6finENrq4gFvc/H67f6lFOLMK', 'Student3'); -- student2
+
+INSERT INTO user_role (user_id, role_id)
+VALUES (1, 1),
+       (2, 2),
+       (3, 3),
+       (4, 3),
+       (5, 3),
+       (5, 2);
+
+-- INSERT INTO STUDENT (NAME)
+-- VALUES ('Ivan'),
+--        ('Peter'),
+--        ('John');
+
+    INSERT INTO TOPIC (TITLE, DURATION_IN_HOURS)
 VALUES ('topic11', 1),
        ('topic12', 4),
        ('topic13', 8),
@@ -50,11 +70,24 @@ VALUES (SELECT id FROM topic WHERE title = 'topic11', 100),
        (SELECT id FROM topic WHERE title = 'topic24', 80);
 
 INSERT INTO RECORD_BOOK (STUDENT_ID, COURSE_ID, START_DATE)
-VALUES (SELECT ID FROM STUDENT WHERE NAME = 'Ivan', SELECT ID FROM COURSE WHERE TITLE = 'Course1', '2021-09-15'),
-       (SELECT ID FROM STUDENT WHERE NAME = 'Peter', SELECT ID FROM COURSE WHERE TITLE = 'Course1', '2021-09-19'),
-       (SELECT ID FROM STUDENT WHERE NAME = 'John', SELECT ID FROM COURSE WHERE TITLE = 'Course2', '2021-09-16');
+VALUES (SELECT ID FROM USER WHERE NAME = 'Ivan', SELECT ID FROM COURSE WHERE TITLE = 'Course1', '2021-09-15'),
+       (SELECT ID FROM USER WHERE NAME = 'Peter', SELECT ID FROM COURSE WHERE TITLE = 'Course1', '2021-09-19'),
+       (SELECT ID FROM USER WHERE NAME = 'John', SELECT ID FROM COURSE WHERE TITLE = 'Course2', '2021-09-16');
 
 INSERT INTO RECORD_BOOK_TOPIC_SCORE (RECORD_BOOK_ID, TOPIC_SCORE_ID)
-VALUES (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
-       (2, 7), (2, 8), (2, 9), (2, 10), (2, 11), (2, 12),
-       (3, 13), (3, 14), (3, 15), (3, 16);
+VALUES (1, 1),
+       (1, 2),
+       (1, 3),
+       (1, 4),
+       (1, 5),
+       (1, 6),
+       (2, 7),
+       (2, 8),
+       (2, 9),
+       (2, 10),
+       (2, 11),
+       (2, 12),
+       (3, 13),
+       (3, 14),
+       (3, 15),
+       (3, 16);

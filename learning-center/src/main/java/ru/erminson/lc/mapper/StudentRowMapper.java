@@ -1,4 +1,4 @@
-package ru.erminson.lc.mappers;
+package ru.erminson.lc.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.erminson.lc.model.entity.Student;

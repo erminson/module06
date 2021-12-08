@@ -1,4 +1,4 @@
-package ru.erminson.lc.mappers;
+package ru.erminson.lc.mapper;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;

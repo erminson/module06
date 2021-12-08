@@ -1,6 +1,7 @@
 package ru.erminson.lc.repository.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,10 +9,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import ru.erminson.lc.mappers.StudentRowMapper;
+import ru.erminson.lc.mapper.StudentRowMapper;
 import ru.erminson.lc.model.dto.request.StudentRequest;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.repository.StudentRepository;
+import ru.erminson.lc.utils.SqlFactory;
 
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -22,21 +24,27 @@ import java.util.Optional;
 @Repository
 public class StudentRepositoryJdbc implements StudentRepository {
     private static final String GET_ALL_STUDENT_SQL = String.format(
-            "SELECT %s, %s FROM STUDENT;",
+            "SELECT %s, %s FROM USER;",
             StudentRowMapper.ID_COLUMN, StudentRowMapper.NAME_COLUMN
     );
     private static final String ADD_STUDENT_SQL = "INSERT INTO STUDENT (NAME) VALUES (?)";
     private static final String DELETE_STUDENT_BY_NAME_SQL = "DELETE FROM STUDENT WHERE NAME = ?";
-    private static final String GET_STUDENT_BY_NAME_SQL = "SELECT ID, NAME FROM STUDENT WHERE NAME = ?";
-    private static final String GET_STUDENT_BY_ID_SQL = "SELECT id, name FROM student WHERE id = ?";
+    private static final String GET_STUDENT_BY_NAME_SQL = "SELECT id, name FROM STUDENT WHERE NAME = ?";
+    private static final String GET_STUDENT_BY_ID_SQL = "SELECT id, name FROM user WHERE id = ?";
     private static final String DELETE_STUDENT_BY_ID_SQL = "DELETE FROM STUDENT WHERE ID = ?";
 
     private final JdbcTemplate jdbcTemplate;
     private final StudentRowMapper studentRowMapper;
+    private SqlFactory sqlFactory;
 
     public StudentRepositoryJdbc(JdbcTemplate jdbcTemplate, StudentRowMapper studentRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.studentRowMapper = studentRowMapper;
+    }
+
+    @Autowired
+    public void setSqlFactory(SqlFactory sqlFactory) {
+        this.sqlFactory = sqlFactory;
     }
 
     @Override
@@ -71,7 +79,10 @@ public class StudentRepositoryJdbc implements StudentRepository {
 
     @Override
     public List<Student> findAll() {
-        return jdbcTemplate.query(GET_ALL_STUDENT_SQL, studentRowMapper);
+        return jdbcTemplate.query(
+                sqlFactory.getSqlQuery("student/select-all-students.sql"),
+                studentRowMapper
+        );
     }
 
     @Override

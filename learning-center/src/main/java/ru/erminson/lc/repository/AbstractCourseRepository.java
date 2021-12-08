@@ -5,6 +5,7 @@ import ru.erminson.lc.model.entity.Topic;
 import ru.erminson.lc.model.exception.IllegalInitialDataException;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class AbstractCourseRepository implements CourseRepository {
     protected List<Course> courses;
@@ -28,6 +29,11 @@ public abstract class AbstractCourseRepository implements CourseRepository {
     @Override
     public List<Course> getAllCourses() {
         return courses;
+    }
+
+    @Override
+    public Optional<Course> findById(long id) {
+        throw new UnsupportedOperationException("findById not supported yet");
     }
 
     @Override

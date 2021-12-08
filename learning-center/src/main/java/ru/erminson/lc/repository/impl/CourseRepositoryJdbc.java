@@ -116,16 +116,29 @@ public class CourseRepositoryJdbc implements CourseRepository {
     @Override
     public List<Course> getAllCourses() {
         String sql = sqlFactory.getSqlQuery("course/select-all-courses.sql");
-        return jdbcTemplate.query(sql, new CourseWithTopicsExtractor());
+        return jdbcTemplate.query(sql, new CoursesWithTopicsExtractor());
+    }
+
+    @Override
+    public Optional<Course> findById(long id) {
+        String sql = sqlFactory.getSqlQuery("course/select-course-by-id.sql");
+        List<Course> courses = jdbcTemplate.query(sql, new CoursesWithTopicsExtractor(), id);
+
+        if (courses == null || courses.isEmpty()) {
+            log.error("Course: {} not found", id);
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(courses.get(0));
     }
 
     @Override
     public Course getCourseByTitle(String title) throws IllegalInitialDataException {
         String sql = sqlFactory.getSqlQuery("course/select-course-by-title.sql");
-        List<Course> courses = jdbcTemplate.query(sql, new CourseWithTopicsExtractor(), title);
+        List<Course> courses = jdbcTemplate.query(sql, new CoursesWithTopicsExtractor(), title);
 
         if (courses == null || courses.isEmpty()) {
-            log.error("Course: {} bit found", title);
+            log.error("Course: {} not found", title);
             throw new IllegalInitialDataException(String.format("Course '%s' not found", title));
         }
 
@@ -138,7 +151,7 @@ public class CourseRepositoryJdbc implements CourseRepository {
         return course.getTopics();
     }
 
-    private static final class CourseWithTopicsExtractor implements ResultSetExtractor<List<Course>> {
+    private static final class CoursesWithTopicsExtractor implements ResultSetExtractor<List<Course>> {
         @Override
         public List<Course> extractData(ResultSet rs) throws SQLException, DataAccessException {
             Map<Long, Course> map = new HashMap<>();
