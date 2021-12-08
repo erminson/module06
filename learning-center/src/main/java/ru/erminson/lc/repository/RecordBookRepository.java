@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface RecordBookRepository {
     boolean addStudentWithRecordBook(Student student, RecordBook recordBook);
     boolean rateTopic(TopicScore topicScore, int score);
+    boolean rateTopic(long topicScoreId, int score);
     RecordBook getRecordBook(String studentName);
     RecordBook getRecordBook(Student student);
     Optional<RecordBook> findByStudentId(long studentId);

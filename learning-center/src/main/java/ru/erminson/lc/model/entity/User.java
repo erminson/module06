@@ -1,4 +1,4 @@
-package ru.erminson.lc.model;
+package ru.erminson.lc.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

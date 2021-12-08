@@ -5,6 +5,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.erminson.lc.model.dto.request.StudentRequest;
+import ru.erminson.lc.model.dto.request.TopicScoreRequest;
 import ru.erminson.lc.model.dto.response.StudentResponse;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
@@ -58,5 +59,12 @@ public class StudentController {
     public ResponseEntity<String> deleteStudent(@PathVariable long id) throws EntityNotFoundException {
         studentService.deleteById(id);
         return ResponseEntity.ok("Student with id: " + id + " deleted with success");
+    }
+
+    @PutMapping("/{id}/topic/{topicId}")
+    public ResponseEntity<String> rate(@PathVariable long id, @PathVariable long topicId, @RequestBody TopicScoreRequest topicScoreRequest) {
+        recordBookService.rateTopic(topicId, topicScoreRequest.getScore());
+
+        return ResponseEntity.ok("TopicScore updated");
     }
 }

@@ -62,6 +62,14 @@ public class RecordBookServiceImpl implements RecordBookService {
     }
 
     @Override
+    public void rateTopic(long topicScoreId, int score) {
+        boolean result = recordBookRepository.rateTopic(topicScoreId, score);
+        if (!result) {
+            throw new EntityNotFoundException(TopicScore.class, "topicScoreId", String.valueOf(topicScoreId));
+        }
+    }
+
+    @Override
     public int getNumberRatedTopics(Student student) {
         RecordBook recordBook = getRecordBookByStudent(student);
         if (recordBook == null) {

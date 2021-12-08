@@ -16,6 +16,7 @@ public interface RecordBookService {
     boolean dismissStudentFromCourse(Student student);
     List<Student> getAllStudentsOnCourses();
     boolean rateTopic(TopicScore topicScore, int score);
+    void rateTopic(long topicScoreId, int score);
     int getNumberRatedTopics(Student student);
     int getNumberRatedTopics(RecordBook recordBook);
     int getNumberTopics(Student student);

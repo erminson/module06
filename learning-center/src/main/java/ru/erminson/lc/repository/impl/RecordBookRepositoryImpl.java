@@ -31,6 +31,11 @@ public class RecordBookRepositoryImpl implements RecordBookRepository {
     }
 
     @Override
+    public boolean rateTopic(long topicScoreId, int score) {
+        throw new UnsupportedOperationException("Method not yet implemented");
+    }
+
+    @Override
     public RecordBook getRecordBook(String studentName) {
         Student student = storage.keySet().stream()
                 .filter(s -> s.getName().equals(studentName))

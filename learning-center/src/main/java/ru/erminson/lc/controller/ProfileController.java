@@ -1,11 +1,12 @@
 package ru.erminson.lc.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.erminson.lc.model.dto.request.ProfileRequest;
 import ru.erminson.lc.service.impl.UserDetailsServiceImpl;
 
+import javax.validation.Valid;
 import java.security.Principal;
 
 @RestController
@@ -21,5 +22,13 @@ public class ProfileController {
     public UserDetails profile(Principal principal) {
         String username = principal.getName();
         return userDetailsService.loadUserByUsername(username);
+    }
+
+    @PutMapping
+    public ResponseEntity<String> edit(@RequestBody @Valid ProfileRequest profileRequest, Principal principal) {
+        String login = principal.getName();
+        userDetailsService.edit(login, profileRequest);
+
+        return ResponseEntity.ok("Profile updated");
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.erminson.lc.model.User;
+import ru.erminson.lc.model.entity.User;
 import ru.erminson.lc.repository.UserRepository;
 
 import java.util.ArrayList;

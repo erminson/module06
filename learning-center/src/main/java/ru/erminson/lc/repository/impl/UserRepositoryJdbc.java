@@ -7,7 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.erminson.lc.mapper.UserExtractor;
 import ru.erminson.lc.mapper.UsersExtractor;
-import ru.erminson.lc.model.User;
+import ru.erminson.lc.model.dto.request.ProfileRequest;
+import ru.erminson.lc.model.entity.User;
 import ru.erminson.lc.repository.UserRepository;
 import ru.erminson.lc.utils.SqlFactory;
 
@@ -56,5 +57,11 @@ public class UserRepositoryJdbc implements UserRepository {
     public List<User> findAll() {
         String sql = sqlFactory.getSqlQuery("user/select-all-users.sql");
         return jdbcTemplate.query(sql, new UsersExtractor());
+    }
+
+    @Override
+    public int edit(String login, ProfileRequest profileRequest) {
+        String sql = sqlFactory.getSqlQuery("user/insert-name.sql");
+        return jdbcTemplate.update(sql, profileRequest.getName(), login);
     }
 }

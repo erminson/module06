@@ -140,7 +140,12 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
 
     @Override
     public boolean rateTopic(TopicScore topicScore, int score) {
-        int updatedCount = jdbcTemplate.update(UPDATE_TOPIC_SCORE_SQL, score, topicScore.getId());
+        return rateTopic(topicScore.getId(), score);
+    }
+
+    @Override
+    public boolean rateTopic(long topicScoreId, int score) {
+        int updatedCount = jdbcTemplate.update(UPDATE_TOPIC_SCORE_SQL, score, topicScoreId);
         return updatedCount > 0;
     }
 
