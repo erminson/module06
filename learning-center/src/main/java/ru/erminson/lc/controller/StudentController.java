@@ -6,9 +6,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.erminson.lc.model.dto.request.StudentRequest;
 import ru.erminson.lc.model.dto.response.StudentResponse;
+import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.exception.EntityHasAlreadyBeenCreated;
 import ru.erminson.lc.model.exception.EntityNotFoundException;
+import ru.erminson.lc.service.RecordBookService;
 import ru.erminson.lc.service.StudentService;
 
 import javax.validation.Valid;
@@ -21,17 +23,16 @@ import java.util.stream.Collectors;
 public class StudentController {
 
     private final StudentService studentService;
+    private final RecordBookService recordBookService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, RecordBookService recordBookService) {
         this.studentService = studentService;
+        this.recordBookService = recordBookService;
     }
 
     @PostMapping
     public ResponseEntity<StudentResponse> addStudent(
             @Valid @RequestBody StudentRequest studentRequest) throws EntityHasAlreadyBeenCreated {
-
-
-
         Student student = studentService.add(studentRequest);
         return ResponseEntity.ok(new StudentResponse(student.getId(), student.getName()));
     }
@@ -46,6 +47,11 @@ public class StudentController {
     @GetMapping("/{id}")
     public Student getStudent(@PathVariable long id) throws EntityNotFoundException {
         return studentService.findById(id);
+    }
+
+    @GetMapping("/{id}/recordbook")
+    public RecordBook getStudentRecordBook(@PathVariable long id) throws EntityNotFoundException {
+        return recordBookService.getRecordBookByStudent(id);
     }
 
     @DeleteMapping("/{id}")

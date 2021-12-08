@@ -5,6 +5,7 @@ import ru.erminson.lc.model.entity.Course;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;
+import ru.erminson.lc.model.exception.EntityNotFoundException;
 import ru.erminson.lc.repository.RecordBookRepository;
 import ru.erminson.lc.service.RecordBookService;
 import ru.erminson.lc.utils.RecordBookInitializer;
@@ -12,6 +13,7 @@ import ru.erminson.lc.utils.RecordBookInitializer;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RecordBookServiceImpl implements RecordBookService {
@@ -35,6 +37,13 @@ public class RecordBookServiceImpl implements RecordBookService {
     @Override
     public RecordBook getRecordBookByStudent(Student student) {
         return recordBookRepository.getRecordBook(student);
+    }
+
+    @Override
+    public RecordBook getRecordBookByStudent(long studentId) {
+        Optional<RecordBook> recordBook = recordBookRepository.findByStudentId(studentId);
+
+        return recordBook.orElseThrow(() -> new EntityNotFoundException(RecordBook.class, "studentId", String.valueOf(studentId)));
     }
 
     @Override

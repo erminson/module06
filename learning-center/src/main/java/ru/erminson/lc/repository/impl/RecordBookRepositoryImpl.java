@@ -5,10 +5,7 @@ import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RecordBookRepositoryImpl implements RecordBookRepository {
 
@@ -45,6 +42,11 @@ public class RecordBookRepositoryImpl implements RecordBookRepository {
     @Override
     public RecordBook getRecordBook(Student student) {
         return storage.get(student);
+    }
+
+    @Override
+    public Optional<RecordBook> findByStudentId(long studentId) {
+        throw new UnsupportedOperationException("findByStudentId(long) not supported yet");
     }
 
     @Override

@@ -9,54 +9,22 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.erminson.lc.mapper.RecordBookExtractor;
 import ru.erminson.lc.mapper.StudentRecordBookExtractor;
 import ru.erminson.lc.model.entity.RecordBook;
 import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.repository.RecordBookRepository;
+import ru.erminson.lc.utils.SqlFactory;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Repository
 public class RecordBookRepositoryJdbc implements RecordBookRepository {
-    private static final String GET_ALL_RECORD_BOOKS_SQL = String.format(
-            "SELECT\n" +
-                    "       RB.ID               %s,\n" +
-                    "       RB.STUDENT_ID       %s,\n" +
-                    "       S.NAME              %s,\n" +
-                    "       C.ID                %s,\n" +
-                    "       C.TITLE             %s,\n" +
-                    "       RB.START_DATE       %s,\n" +
-                    "       TS.ID               %s,\n" +
-                    "       T.ID                %s,\n" +
-                    "       T.TITLE             %s,\n" +
-                    "       TS.SCORE            %s,\n" +
-                    "       T.DURATION_IN_HOURS %s,\n" +
-                    "       CT.PRIORITY         %s\n" +
-                    "FROM RECORD_BOOK RB\n" +
-                    "         JOIN STUDENT S ON RB.STUDENT_ID = S.ID\n" +
-                    "         JOIN RECORD_BOOK_TOPIC_SCORE RBTS ON RBTS.RECORD_BOOK_ID = RB.ID\n" +
-                    "         JOIN TOPIC_SCORE TS ON TS.ID = RBTS.TOPIC_SCORE_ID\n" +
-                    "         JOIN TOPIC T ON T.ID = TS.TOPIC_ID\n" +
-                    "         JOIN COURSE_TOPIC CT ON CT.TOPIC_ID = T.ID\n" +
-                    "         JOIN COURSE C on C.ID = CT.COURSE_ID",
-            StudentRecordBookExtractor.RECORD_BOOK_ID_COLUMN, StudentRecordBookExtractor.STUDENT_ID_COLUMN,
-            StudentRecordBookExtractor.STUDENT_NAME_COLUMN, StudentRecordBookExtractor.COURSE_ID_COLUMN,
-            StudentRecordBookExtractor.COURSE_TITLE_COLUMN, StudentRecordBookExtractor.START_DATE_COLUMN,
-            StudentRecordBookExtractor.TOPIC_SCORE_ID_COLUMN, StudentRecordBookExtractor.TOPIC_ID_COLUMN,
-            StudentRecordBookExtractor.TOPIC_TITLE_COLUMN, StudentRecordBookExtractor.TOPIC_SCORE_COLUMN,
-            StudentRecordBookExtractor.DURATION_IN_HOURS_COLUMN, StudentRecordBookExtractor.PRIORITY_COLUMN
-    );
-    private static final String GET_RECORD_BOOK_BY_STUDENT_NAME_SQL =
-            String.format("%s\nWHERE S.NAME = ?", GET_ALL_RECORD_BOOKS_SQL);
-
     private static final String INSERT_RECORD_BOOK_SQL =
             "INSERT INTO RECORD_BOOK (STUDENT_ID, COURSE_ID, START_DATE)\n" +
                     "VALUES (?, ?, ?);";
@@ -109,9 +77,11 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
                     "WHERE ID = ?;";
 
     private final JdbcTemplate jdbcTemplate;
+    private final SqlFactory sqlFactory;
 
-    public RecordBookRepositoryJdbc(JdbcTemplate jdbcTemplate) {
+    public RecordBookRepositoryJdbc(JdbcTemplate jdbcTemplate, SqlFactory sqlFactory) {
         this.jdbcTemplate = jdbcTemplate;
+        this.sqlFactory = sqlFactory;
     }
 
     @Override
@@ -177,7 +147,7 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     @Override
     public RecordBook getRecordBook(String studentName) {
         Map<Student, RecordBook> map = jdbcTemplate.query(
-                GET_RECORD_BOOK_BY_STUDENT_NAME_SQL,
+                sqlFactory.getSqlQuery("recordbook/select-recordbook-by-student-name.sql"),
                 new StudentRecordBookExtractor(),
                 studentName
         );
@@ -198,6 +168,21 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     @Override
     public RecordBook getRecordBook(Student student) {
         return getRecordBook(student.getName());
+    }
+
+    @Override
+    public Optional<RecordBook> findByStudentId(long studentId) {
+        String sql = sqlFactory.getSqlQuery("recordbook/select-recordbook-by-student-id.sql");
+        RecordBook recordBook = null;
+
+        try {
+            recordBook = jdbcTemplate.query(sql, new RecordBookExtractor(), studentId);
+            log.debug("Record book for student with id: {} was found", studentId);
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("Record book for student wit id: {} wasn't found", studentId);
+        }
+
+        return Optional.ofNullable(recordBook);
     }
 
     @Override

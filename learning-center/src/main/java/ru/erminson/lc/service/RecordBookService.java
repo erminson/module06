@@ -12,6 +12,7 @@ public interface RecordBookService {
     boolean enrollStudentOnCourse(Student student, Course course);
     RecordBook getRecordBookByStudentName(String studentName);
     RecordBook getRecordBookByStudent(Student student);
+    RecordBook getRecordBookByStudent(long studentId);
     boolean dismissStudentFromCourse(Student student);
     List<Student> getAllStudentsOnCourses();
     boolean rateTopic(TopicScore topicScore, int score);
