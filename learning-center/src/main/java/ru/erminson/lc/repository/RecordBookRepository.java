@@ -17,4 +17,6 @@ public interface RecordBookRepository {
     boolean isStudentOnCourse(Student student);
     boolean removeStudentFromCourse(Student student);
     List<Student> getAllStudents();
+
+    boolean enrollStudentOnCourse(long studentId, RecordBook recordBook);
 }

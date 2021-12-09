@@ -9,16 +9,24 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface RecordBookService {
-    boolean enrollStudentOnCourse(Student student, Course course);
+
     RecordBook getRecordBookByStudentName(String studentName);
     RecordBook getRecordBookByStudent(Student student);
     RecordBook getRecordBookByStudent(long studentId);
+
+    boolean enrollStudentOnCourse(Student student, Course course);
+    void enrollStudentOnCourse(long studentId, long courseId);
+
     boolean dismissStudentFromCourse(Student student);
+
     List<Student> getAllStudentsOnCourses();
+
     boolean rateTopic(TopicScore topicScore, int score);
     void rateTopic(long topicScoreId, int score);
+
     int getNumberRatedTopics(Student student);
     int getNumberRatedTopics(RecordBook recordBook);
+
     int getNumberTopics(Student student);
     int getNumberTopics(RecordBook recordBook);
 

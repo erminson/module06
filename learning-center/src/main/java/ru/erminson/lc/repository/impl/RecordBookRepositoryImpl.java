@@ -26,6 +26,11 @@ public class RecordBookRepositoryImpl implements RecordBookRepository {
     }
 
     @Override
+    public boolean enrollStudentOnCourse(long studentId, RecordBook recordBook) {
+        throw new UnsupportedOperationException("enrollStudentOnCourse(long, long) method not supported yet");
+    }
+
+    @Override
     public boolean rateTopic(TopicScore topicScore, int score) {
         throw new UnsupportedOperationException("Method not yet implemented");
     }

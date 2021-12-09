@@ -85,13 +85,18 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     }
 
     @Override
-    @Transactional
     public boolean addStudentWithRecordBook(Student student, RecordBook recordBook) {
+        return enrollStudentOnCourse(student.getId(), recordBook);
+    }
+
+    @Override
+    @Transactional
+    public boolean enrollStudentOnCourse(long studentId, RecordBook recordBook) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
             jdbcTemplate.update(con -> {
                 PreparedStatement ps = con.prepareStatement(INSERT_RECORD_BOOK_SQL, new String[]{"ID"});
-                ps.setLong(1, student.getId());
+                ps.setLong(1, studentId);
                 ps.setLong(2, recordBook.getCourseId());
                 ps.setDate(3, Date.valueOf(recordBook.getStartDate()));
                 return ps;

@@ -67,4 +67,11 @@ public class StudentController {
 
         return ResponseEntity.ok("TopicScore updated");
     }
+
+    @PostMapping("/{id}/course/{courseId}")
+    public ResponseEntity<String> enrollOnCourse(@PathVariable long id, @PathVariable long courseId) {
+        recordBookService.enrollStudentOnCourse(id, courseId);
+
+        return ResponseEntity.ok("Student enrolled");
+    }
 }

@@ -7,6 +7,7 @@ import ru.erminson.lc.model.entity.Student;
 import ru.erminson.lc.model.entity.TopicScore;
 import ru.erminson.lc.model.exception.EntityNotFoundException;
 import ru.erminson.lc.repository.RecordBookRepository;
+import ru.erminson.lc.service.CourseService;
 import ru.erminson.lc.service.RecordBookService;
 import ru.erminson.lc.utils.RecordBookInitializer;
 
@@ -18,15 +19,27 @@ import java.util.Optional;
 @Service
 public class RecordBookServiceImpl implements RecordBookService {
     private final RecordBookRepository recordBookRepository;
+    private final CourseService courseService;
 
-    public RecordBookServiceImpl(RecordBookRepository recordBookRepository) {
+    public RecordBookServiceImpl(RecordBookRepository recordBookRepository, CourseService courseService) {
         this.recordBookRepository = recordBookRepository;
+        this.courseService = courseService;
     }
 
     @Override
     public boolean enrollStudentOnCourse(Student student, Course course) {
         RecordBook recordBook = RecordBookInitializer.createRecordBookByCourse(course);
         return recordBookRepository.addStudentWithRecordBook(student, recordBook);
+    }
+
+    @Override
+    public void enrollStudentOnCourse(long studentId, long courseId) {
+        Course course = courseService.findById(courseId);
+        RecordBook recordBook = RecordBookInitializer.createRecordBookByCourse(course);
+        boolean result = recordBookRepository.enrollStudentOnCourse(studentId, recordBook);
+        if (!result) {
+            throw new EntityNotFoundException(Student.class, "studentId", String.valueOf(studentId));
+        }
     }
 
     @Override

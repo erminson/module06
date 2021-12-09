@@ -21,11 +21,11 @@ public class StudyServiceFactory {
         StudentRepository studentRepository = StudentRepositoryYamlInitializer.create();
         StudentService studentService = new StudentServiceImpl(studentRepository);
 
-        RecordBookRepository recordBookRepository = RecordBookRepositoryInitializer.create(studentRepository);
-        RecordBookService recordBookService = new RecordBookServiceImpl(recordBookRepository);
-
         CourseRepository courseRepository = CourseRepositoryYamlInitializer.create();
         CourseService courseService = new CourseServiceImpl(courseRepository);
+
+        RecordBookRepository recordBookRepository = RecordBookRepositoryInitializer.create(studentRepository);
+        RecordBookService recordBookService = new RecordBookServiceImpl(recordBookRepository, courseService);
 
         return new StudyServiceImpl(studentService, recordBookService, courseService);
     }

@@ -8,7 +8,8 @@ VALUES ('admin1', '$2a$12$uV66DMJTnlReDUqlIsM5neJu0GLmE9cJzJxuAdHwpfaM6ANOiE7Uu'
        ('teacher1', '$2a$12$bdvFkIYNBj.GjxFPwVUikOyCG5Gh0vTy6TCivQnu0GJf5xpJMgL46', 'Teacher1'), -- teacher1
        ('student1', '$2a$10$rqtxo3EGCEd2AEJR2OWDle2ZgANo2qNRNsX8Tu8tr7h3KF1UVYrQi', 'Student1'), -- student1
        ('student2', '$2a$12$HgCz/TdbB1rkr1HvBl5HbOdoBI5M6finENrq4gFvc/H67f6lFOLMK', 'Student2'), -- student2
-       ('student3', '$2a$12$HgCz/TdbB1rkr1HvBl5HbOdoBI5M6finENrq4gFvc/H67f6lFOLMK', 'Student3'); -- student2
+       ('student3', '$2a$12$S1W/G1SN783e2aRrwqZU9exOhwk6EjafsOel3yTyufDh4E0MVPPZG', 'Student3'), -- student2
+       ('student4', '$2a$12$5nSdJwVMubTKBi1kyxl0geoVMmybCjS4pERr81uurcP2SaxMTAPUW', 'Student4'); -- student2
 
 INSERT INTO user_role (user_id, role_id)
 VALUES (1, 1),
@@ -16,12 +17,8 @@ VALUES (1, 1),
        (3, 3),
        (4, 3),
        (5, 3),
-       (5, 2);
-
--- INSERT INTO STUDENT (NAME)
--- VALUES ('Ivan'),
---        ('Peter'),
---        ('John');
+       (5, 2),
+       (6, 3);
 
 INSERT INTO TOPIC (TITLE, DURATION_IN_HOURS)
 VALUES ('topic11', 1),
