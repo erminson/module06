@@ -1,0 +1,20 @@
+SELECT RB.ID               RECORD_BOOK_ID,
+       RB.STUDENT_ID       STUDENT_ID,
+       S.NAME              STUDENT_NAME,
+       C.ID                COURSE_ID,
+       C.TITLE             COURSE_TITLE,
+       RB.START_DATE       START_DATE,
+       TS.ID               TOPIC_SCORE_ID,
+       T.ID                TOPIC_ID,
+       T.TITLE             TOPIC_TITLE,
+       TS.SCORE            TOPIC_SCORE,
+       T.DURATION_IN_HOURS DURATION_IN_HOURS,
+       CT.PRIORITY         PRIORITY_HOURS
+FROM RECORD_BOOK RB
+         JOIN USER S ON RB.STUDENT_ID = S.ID
+         JOIN RECORD_BOOK_TOPIC_SCORE RBTS ON RBTS.RECORD_BOOK_ID = RB.ID
+         JOIN TOPIC_SCORE TS ON TS.ID = RBTS.TOPIC_SCORE_ID
+         JOIN TOPIC T ON T.ID = TS.TOPIC_ID
+         JOIN COURSE_TOPIC CT ON CT.TOPIC_ID = T.ID
+         JOIN COURSE C on C.ID = CT.COURSE_ID
+WHERE S.ID = ?;

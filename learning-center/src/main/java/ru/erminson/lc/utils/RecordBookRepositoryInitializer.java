@@ -34,11 +34,8 @@ public class RecordBookRepositoryInitializer {
                     String studentName = recordBookDto.getStudentName();
                     RecordBook recordBook = RecordBookInitializer.createRecordBookByRecordBookDto(recordBookDto);
                     Student student;
-                    try {
-                        student = studentRepository.getStudentByName(studentName);
-                    } catch (Exception e) {
-                        student = new Student(studentName);
-                    }
+                    student = studentRepository.findByName(studentName).orElse(new Student(studentName));
+
                     storage.put(student, recordBook);
                 });
 

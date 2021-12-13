@@ -8,7 +8,8 @@ import java.util.List;
 public interface CourseService {
     boolean add(Course course);
     boolean isExistCourseByTitle(String courseTitle);
-    List<Course> getAllCourses();
+    List<Course> findAll();
+    Course findById(long id);
     Course getCourseByTitle(String title);
     List<Topic> getTopicsByCourseTitle(String title);
 }
