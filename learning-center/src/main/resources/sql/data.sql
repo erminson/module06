@@ -1,7 +1,7 @@
 INSERT INTO role (name)
 VALUES ('ROLE_ADMIN'),
        ('ROLE_TEACHER'),
-       ('STUDENT');
+       ('ROLE_STUDENT');
 
 INSERT INTO user (login, password, name)
 VALUES ('admin1', '$2a$12$uV66DMJTnlReDUqlIsM5neJu0GLmE9cJzJxuAdHwpfaM6ANOiE7Uu', 'Admin1'),     -- admin1

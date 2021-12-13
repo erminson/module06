@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.erminson.ru/payment-service/payments" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.erminson.ru/payment-service/payments" targetNamespace="http://www.erminson.ru/payment-service/payments">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.erminson.ru/payment-service/payments">
+
+    <xs:element name="GetPaymentDetailsRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="order_id" type="xs:long"/>
+                <xs:element name="amount" type="xs:decimal"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetPaymentDetailsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="PaymentDetails" type="tns:PaymentDetails"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="PaymentDetails">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long"/>
+            <xs:element name="amount" type="xs:decimal"/>
+            <xs:element name="order_id" type="xs:long"/>
+            <xs:element name="date" type="xs:dateTime"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="GetPaymentDetailsResponse">
+    <wsdl:part element="tns:GetPaymentDetailsResponse" name="GetPaymentDetailsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="GetPaymentDetailsRequest">
+    <wsdl:part element="tns:GetPaymentDetailsRequest" name="GetPaymentDetailsRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="PaymentPort">
+    <wsdl:operation name="GetPaymentDetails">
+      <wsdl:input message="tns:GetPaymentDetailsRequest" name="GetPaymentDetailsRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:GetPaymentDetailsResponse" name="GetPaymentDetailsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PaymentPortSoap11" type="tns:PaymentPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="GetPaymentDetails">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="GetPaymentDetailsRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="GetPaymentDetailsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="PaymentPortService">
+    <wsdl:port binding="tns:PaymentPortSoap11" name="PaymentPortSoap11">
+      <soap:address location="http://localhost:8082/ws"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
