@@ -10,7 +10,7 @@ public class PaymentClientConfig {
     @Bean
     public Jaxb2Marshaller marshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("ru.erminson.paymentservice.wsdl");
+        marshaller.setContextPath("ru.erminson.lc.soap.model");
 
         return marshaller;
     }

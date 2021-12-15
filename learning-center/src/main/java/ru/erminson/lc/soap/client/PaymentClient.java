@@ -1,8 +1,8 @@
 package ru.erminson.lc.soap.client;
 
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
-import ru.erminson.paymentservice.wsdl.GetPaymentDetailsRequest;
-import ru.erminson.paymentservice.wsdl.GetPaymentDetailsResponse;
+import ru.erminson.lc.soap.model.GetPaymentDetailsRequest;
+import ru.erminson.lc.soap.model.GetPaymentDetailsResponse;
 
 import java.math.BigDecimal;
 

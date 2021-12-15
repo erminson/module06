@@ -11,8 +11,8 @@ import ru.erminson.lc.repository.OrderRepository;
 import ru.erminson.lc.service.OrderService;
 import ru.erminson.lc.service.UserService;
 import ru.erminson.lc.soap.client.PaymentClient;
-import ru.erminson.paymentservice.wsdl.GetPaymentDetailsResponse;
-import ru.erminson.paymentservice.wsdl.PaymentDetails;
+import ru.erminson.lc.soap.model.GetPaymentDetailsResponse;
+import ru.erminson.lc.soap.model.PaymentDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
