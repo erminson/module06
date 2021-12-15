@@ -12,6 +12,7 @@ import ru.erminson.lc.service.OrderService;
 import ru.erminson.lc.service.UserService;
 import ru.erminson.lc.soap.client.PaymentClient;
 import ru.erminson.lc.soap.model.GetPaymentDetailsResponse;
+import ru.erminson.lc.soap.model.ObjectFactory;
 import ru.erminson.lc.soap.model.PaymentDetails;
 
 import java.math.BigDecimal;
@@ -27,6 +28,8 @@ public class OrderServiceImpl implements OrderService {
     private PaymentClient paymentClient;
     private UserService userService;
 
+    private ObjectFactory objectFactory;
+
     public OrderServiceImpl(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
@@ -39,6 +42,11 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     public void setUserDetailsService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setObjectFactory(ObjectFactory objectFactory) {
+        this.objectFactory = objectFactory;
     }
 
     @Override
@@ -76,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         try {
-            GetPaymentDetailsResponse response = paymentClient.getPaymentDetailsResponse(
+            GetPaymentDetailsResponse response = paymentClient.getPaymentDetails(
                     payment.getOrderId(), payment.getAmount()
             );
             DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
