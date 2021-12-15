@@ -1,38 +1,38 @@
 package ru.erminson.lc.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.ws.soap.client.SoapFaultClientException;
-import ru.erminson.lc.soap.client.PaymentClient;
-import ru.erminson.paymentservice.wsdl.GetPaymentDetailsResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.erminson.lc.mapper.PaymentMapper;
+import ru.erminson.lc.model.dto.PaymentDto;
+import ru.erminson.lc.model.entity.Order;
+import ru.erminson.lc.model.entity.Payment;
+import ru.erminson.lc.service.OrderService;
 
-import java.math.BigDecimal;
 import java.security.Principal;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("orders")
 public class OrderController {
-    private final PaymentClient paymentClient;
+    private final OrderService orderService;
 
-    public OrderController(PaymentClient paymentClient) {
-        this.paymentClient = paymentClient;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     @PostMapping
-    public String payOrder(@RequestBody Map<String, String> body, Principal principal) {
-        String username = principal.getName();
-        long orderId = 1;
-        BigDecimal amount = new BigDecimal(300);
-        try {
-        GetPaymentDetailsResponse response = paymentClient.getPaymentDetailsResponse(orderId, amount);
+    public ResponseEntity<String> payOrder(@RequestBody PaymentDto paymentDto, Principal principal) {
+        String login = principal.getName();
+        Payment payment = PaymentMapper.payment(paymentDto);
 
-        } catch (SoapFaultClientException e) {
-            System.out.println(e);
-        }
+        orderService.payForOrder(login, payment);
 
-        return "true";
+        return ResponseEntity.ok("Order successfully paid ");
+    }
+
+    @GetMapping
+    public List<Order> orders(Principal principal) {
+        String login = principal.getName();
+        return orderService.findAllByLogin(login);
     }
 }

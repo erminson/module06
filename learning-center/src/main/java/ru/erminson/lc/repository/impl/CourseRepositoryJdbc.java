@@ -27,9 +27,8 @@ import java.util.*;
 @Repository
 public class CourseRepositoryJdbc implements CourseRepository {
     private final JdbcTemplate jdbcTemplate;
-    private SqlFactory sqlFactory;
-
     private final KeyHolder keyHolder = new GeneratedKeyHolder();
+    private SqlFactory sqlFactory;
 
     public CourseRepositoryJdbc(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -49,20 +48,22 @@ public class CourseRepositoryJdbc implements CourseRepository {
         }
 
         List<Long> topicIds = insertTopicsIntoDB(course.getTopics());
-        jdbcTemplate.batchUpdate(sqlFactory.getSqlQuery("course/insert-course-topic.sql"), new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                Long topicId = topicIds.get(i);
-                ps.setLong(1, courseId);
-                ps.setLong(2, topicId);
-                ps.setInt(3, i);
-            }
+        jdbcTemplate.batchUpdate(
+                sqlFactory.getSqlQuery("course/insert-course-topic.sql"),
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        Long topicId = topicIds.get(i);
+                        ps.setLong(1, courseId);
+                        ps.setLong(2, topicId);
+                        ps.setInt(3, i);
+                    }
 
-            @Override
-            public int getBatchSize() {
-                return topicIds.size();
-            }
-        });
+                    @Override
+                    public int getBatchSize() {
+                        return topicIds.size();
+                    }
+                });
 
         return true;
     }
@@ -75,6 +76,7 @@ public class CourseRepositoryJdbc implements CourseRepository {
                         new String[]{"ID"}
                 );
                 ps.setString(1, course.getTitle());
+                ps.setBigDecimal(2, course.getPrice());
 
                 return ps;
             }, keyHolder);
@@ -162,6 +164,7 @@ public class CourseRepositoryJdbc implements CourseRepository {
                     course = new Course();
                     course.setId(courseId);
                     course.setTitle(rs.getString("COURSE_TITLE"));
+                    course.setPrice(rs.getBigDecimal("COURSE_PRICE"));
                     course.setTopics(new ArrayList<>());
                     map.put(courseId, course);
                 }

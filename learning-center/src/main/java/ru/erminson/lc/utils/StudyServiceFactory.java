@@ -1,16 +1,11 @@
 package ru.erminson.lc.utils;
 
 import ru.erminson.lc.repository.CourseRepository;
+import ru.erminson.lc.repository.OrderRepository;
 import ru.erminson.lc.repository.RecordBookRepository;
 import ru.erminson.lc.repository.StudentRepository;
-import ru.erminson.lc.service.CourseService;
-import ru.erminson.lc.service.RecordBookService;
-import ru.erminson.lc.service.StudentService;
-import ru.erminson.lc.service.StudyService;
-import ru.erminson.lc.service.impl.CourseServiceImpl;
-import ru.erminson.lc.service.impl.RecordBookServiceImpl;
-import ru.erminson.lc.service.impl.StudentServiceImpl;
-import ru.erminson.lc.service.impl.StudyServiceImpl;
+import ru.erminson.lc.service.*;
+import ru.erminson.lc.service.impl.*;
 
 public class StudyServiceFactory {
     private StudyServiceFactory() {
@@ -24,8 +19,11 @@ public class StudyServiceFactory {
         CourseRepository courseRepository = CourseRepositoryYamlInitializer.create();
         CourseService courseService = new CourseServiceImpl(courseRepository);
 
+        OrderRepository orderRepository = new OrderRepositoryImp();
+        OrderService orderService = new OrderServiceImpl(orderRepository);
+
         RecordBookRepository recordBookRepository = RecordBookRepositoryInitializer.create(studentRepository);
-        RecordBookService recordBookService = new RecordBookServiceImpl(recordBookRepository, courseService);
+        RecordBookService recordBookService = new RecordBookServiceImpl(recordBookRepository, courseService, orderService);
 
         return new StudyServiceImpl(studentService, recordBookService, courseService);
     }

@@ -46,7 +46,19 @@ CREATE TABLE IF NOT EXISTS topic
 CREATE TABLE IF NOT EXISTS course
 (
     id    IDENTITY     NOT NULL PRIMARY KEY,
-    title VARCHAR(128) NOT NULL UNIQUE
+    title VARCHAR(128) NOT NULL UNIQUE,
+    price NUMERIC DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS orders
+(
+    id         IDENTITY NOT NULL PRIMARY KEY,
+    student_id BIGINT REFERENCES user (id),
+    course_id  BIGINT REFERENCES course (id),
+    price      NUMERIC,
+    created_at TIMESTAMP,
+    payment_at TIMESTAMP,
+    payment_id BIGINT UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS course_topic

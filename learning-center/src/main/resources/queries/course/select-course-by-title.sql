@@ -1,5 +1,6 @@
 SELECT C.ID                AS COURSE_ID,
        C.TITLE             AS COURSE_TITLE,
+       C.PRICE             AS COURSE_PRICE,
        T.ID                AS TOPIC_ID,
        T.TITLE             AS TOPIC_TITLE,
        T.DURATION_IN_HOURS AS DURATION_IN_HOURS
