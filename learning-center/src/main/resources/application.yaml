@@ -1,14 +1,14 @@
 spring:
-  sql:
-    init:
-      schema-locations: classpath:sql/schema.sql
-      data-locations: classpath:sql/data.sql
-      mode: always
+#  sql:
+#    init:
+#      schema-locations: classpath:sql/schema.sql
+#      data-locations: classpath:sql/data.sql
+#      mode: always
   datasource:
-    driverClassName: org.h2.Driver
-    jdbc-url: jdbc:h2:mem:lc
-    username: admin
-    password: admin
+    driverClassName: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://localhost:5432/lc-db
+    username: postgres
+    password: postgres
     hikari:
       maximum-pool-size: 10
   h2:

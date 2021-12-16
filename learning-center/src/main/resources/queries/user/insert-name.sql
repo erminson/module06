@@ -1,3 +1,3 @@
-UPDATE USER
+UPDATE USERS
 SET name = ?
 WHERE login = ?

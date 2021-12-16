@@ -23,14 +23,10 @@ import java.util.Optional;
 @Slf4j
 @Repository
 public class StudentRepositoryJdbc implements StudentRepository {
-    private static final String GET_ALL_STUDENT_SQL = String.format(
-            "SELECT %s, %s FROM USER;",
-            StudentRowMapper.ID_COLUMN, StudentRowMapper.NAME_COLUMN
-    );
     private static final String ADD_STUDENT_SQL = "INSERT INTO STUDENT (NAME) VALUES (?)";
     private static final String DELETE_STUDENT_BY_NAME_SQL = "DELETE FROM STUDENT WHERE NAME = ?";
     private static final String GET_STUDENT_BY_NAME_SQL = "SELECT id, name FROM STUDENT WHERE NAME = ?";
-    private static final String GET_STUDENT_BY_ID_SQL = "SELECT id, name FROM user WHERE id = ?";
+    private static final String GET_STUDENT_BY_ID_SQL = "SELECT id, name FROM users WHERE id = ?";
     private static final String DELETE_STUDENT_BY_ID_SQL = "DELETE FROM STUDENT WHERE ID = ?";
 
     private final JdbcTemplate jdbcTemplate;
