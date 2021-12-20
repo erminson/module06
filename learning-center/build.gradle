@@ -76,30 +76,27 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-
-//    runtimeOnly 'com.h2database:h2:1.4.200'
-    runtimeOnly 'org.postgresql:postgresql:42.3.1'
-
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-
-    implementation project(':logging-starter')
-
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-
     implementation('org.springframework.boot:spring-boot-starter-web-services') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
     implementation 'org.springframework.ws:spring-ws-core'
 
-    implementation 'org.glassfish.jaxb:jaxb-runtime'
-    implementation(files(genJaxb.classesDir).builtBy(genJaxb))
-
-    jaxb "com.sun.xml.bind:jaxb-xjc:2.1.7"
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage'
     }
+
+    implementation project(':logging-starter')
+
+    runtimeOnly 'org.postgresql:postgresql:42.3.1'
+
+    implementation 'org.glassfish.jaxb:jaxb-runtime'
+    implementation(files(genJaxb.classesDir).builtBy(genJaxb))
+    jaxb "com.sun.xml.bind:jaxb-xjc:2.1.7"
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 }
 
 test {
@@ -109,4 +106,17 @@ test {
 bootJar {
     baseName 'gs-consuming-web-service'
     version '0.0.1'
+}
+
+genJaxb.enabled = false
+
+gradle.taskGraph.whenReady {taskGraph ->
+    println "Found task graph: " + taskGraph
+    println "Found " + taskGraph.allTasks.size() + " tasks."
+    taskGraph.allTasks.forEach { task ->
+        println task
+        task.dependsOn.forEach { dep ->
+            println "  - " + dep
+        }
+    }
 }

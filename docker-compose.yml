@@ -1,0 +1,39 @@
+version: '2.3'
+
+services:
+  learning_app:
+    image: 'lc-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/learning-center/Dockerfile
+    container_name: learning-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_URL=lc-postgres:5432/lc-db
+      - PAYMENT_URL=http://payment-app:8082/ws
+  payment_app:
+    image: 'ps-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/payment-service/Dockerfile
+    container_name: payment-app
+    expose:
+      - "8082"
+  db:
+    image: 'postgres:14.1-alpine3.15'
+    container_name: lc-postgres
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    expose:
+      - "5432"
+    volumes:
+      - ./.docker/database/init:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=lc-db

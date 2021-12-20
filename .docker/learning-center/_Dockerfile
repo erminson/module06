@@ -1,0 +1,26 @@
+#FROM gradle:jdk13 AS cache
+#WORKDIR /app
+#ENV GRADLE_USER_HOME /cache
+#COPY build.gradle gradle.properties settings.gradle ./
+#RUN gradle --no-daemon build --stacktrace
+
+FROM gradle:jdk11 AS builder
+WORKDIR /app
+#COPY --from=cache /cache /home/gradle/.gradle
+COPY learning-center/ learning-center/
+COPY logging-starter/ logging-starter/
+#RUN gradle --no-daemon build --stacktrace
+COPY settings.gradle settings.gradle
+COPY build.gradle build.gradle
+RUN gradle :learning-center:bootJar
+RUN ls -l
+
+FROM openjdk:11
+WORKDIR /app
+#RUN apk --no-cache add curl
+COPY --from=builder /app/learning-center/build/libs/gs-consuming-web-service-0.0.1.jar /gs-consuming-web-service-0.0.1.jar
+#ENV PORT 80
+EXPOSE 80
+#HEALTHCHECK --timeout=5s --start-period=5s --retries=1 \
+#    CMD curl -f http://localhost:$PORT/health_check
+CMD ["java", "-jar", "/gs-consuming-web-service-0.0.1.jar"]

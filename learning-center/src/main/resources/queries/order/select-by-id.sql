@@ -1,9 +1,9 @@
-SELECT ID,
-       STUDENT_ID,
-       COURSE_ID,
-       PRICE,
-       CREATED_AT,
-       PAYMENT_AT,
-       PAYMENT_ID
-FROM ORDERS
-WHERE ID = ?;
+SELECT id,
+       student_id,
+       course_id,
+       price,
+       created_at,
+       payment_at,
+       payment_id
+FROM orders
+WHERE id = ?;
