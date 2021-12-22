@@ -18,6 +18,7 @@ repositories {
 
 ext {
     tomcatWebappPath = "/Users/erminson/apache-tomcat-10.0.11/webapps"
+    set('springCloudVersion', "2020.0.5")
 }
 
 bootWar {
@@ -70,6 +71,24 @@ task genJaxb {
     }
 }
 
+bootJar {
+    baseName 'gs-consuming-web-service'
+    version '0.0.1'
+}
+
+genJaxb.enabled = false
+
+gradle.taskGraph.whenReady {taskGraph ->
+    println "Found task graph: " + taskGraph
+    println "Found " + taskGraph.allTasks.size() + " tasks."
+    taskGraph.allTasks.forEach { task ->
+        println task
+        task.dependsOn.forEach { dep ->
+            println "  - " + dep
+        }
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
@@ -100,24 +119,12 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 test {
     useJUnitPlatform()
-}
-
-bootJar {
-    baseName 'gs-consuming-web-service'
-    version '0.0.1'
-}
-
-genJaxb.enabled = false
-
-gradle.taskGraph.whenReady {taskGraph ->
-    println "Found task graph: " + taskGraph
-    println "Found " + taskGraph.allTasks.size() + " tasks."
-    taskGraph.allTasks.forEach { task ->
-        println task
-        task.dependsOn.forEach { dep ->
-            println "  - " + dep
-        }
-    }
 }
