@@ -80,6 +80,7 @@ dependencies {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
     implementation 'org.springframework.ws:spring-ws-core'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
