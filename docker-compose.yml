@@ -58,7 +58,7 @@ services:
         condition: service_healthy
       config-service:
         condition: service_healthy
-      db:
+      lc-db:
         condition: service_started
     environment:
       SERVER_PORT: 8080
@@ -86,19 +86,17 @@ services:
         condition: service_healthy
       config-service:
         condition: service_healthy
+      ps-db:
+        condition: service_started
     environment:
       SERVER_PORT: 8080
+      DB_URL: ps-postgres:5432/ps-db
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
 
-  db:
+  lc-db:
     image: 'postgres:14.1-alpine3.15'
     container_name: lc-postgres
-#    depends_on:
-#      discovery-service:
-#        condition: service_healthy
-#      config-service:
-#        condition: service_healthy
     logging:
       options:
         max-size: 10m
@@ -106,8 +104,26 @@ services:
     expose:
       - "5432"
     volumes:
-      - ./.docker/database/init:/docker-entrypoint-initdb.d/
+      - ./.docker/lc-db/init:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=lc-db
+
+  ps-db:
+    image: 'postgres:14.1-alpine3.15'
+    container_name: ps-postgres
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+#    expose:
+#      - "5432"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.docker/ps-db/init:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ps-db

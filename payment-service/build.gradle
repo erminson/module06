@@ -63,6 +63,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
     implementation 'wsdl4j:wsdl4j'
     implementation 'javax.xml.bind:jaxb-api'
@@ -76,6 +77,8 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage'
     }
+
+    runtimeOnly 'org.postgresql:postgresql:42.3.1'
 }
 
 dependencyManagement {
