@@ -1,13 +1,13 @@
 spring:
-  datasource:
-    driverClassName: org.postgresql.Driver
-    jdbc-url: jdbc:postgresql://${DB_URL}       #lc-postgres:5432/lc-db
-    username: postgres
-    password: postgres
-    hikari:
-      maximum-pool-size: 10
   application:
     name: learning-center-service
+  config:
+    import: optional:configserver:${CONFIG_URL:http://localhost:8888}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_URL:http://localhost:8761/eureka}
 
 logging:
   enabled: true
