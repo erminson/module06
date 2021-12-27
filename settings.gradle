@@ -4,4 +4,5 @@ include 'logging-starter'
 include 'payment-service'
 include 'discovery-service'
 include 'config-service'
+include 'gateway-service'
 

@@ -30,14 +30,38 @@ services:
       timeout: 5s
       retries: 2
     restart: always
-    ports:
-      - "8888:8080"
+#    ports:
+#      - "8888:8080"
     depends_on:
       discovery-service:
         condition: service_healthy
     environment:
       SERVER_PORT: 8080
       DISCOVERY_URL: http://discovery-app:8080/eureka/
+
+  gateway-service:
+    image: 'gs-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/gateway-service/Dockerfile
+    container_name: gateway-app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+      CONFIG_URL: http://config-service:8080/
 
   learning_app:
     image: 'lc-app:0.0.1'
@@ -51,12 +75,14 @@ services:
       timeout: 2s
       retries: 2
     restart: always
-    ports:
-      - "8093:8080"
+#    ports:
+#      - "8093:8080"
     depends_on:
       discovery-service:
         condition: service_healthy
       config-service:
+        condition: service_healthy
+      gateway-service:
         condition: service_healthy
       lc-db:
         condition: service_started
@@ -85,6 +111,8 @@ services:
       discovery-service:
         condition: service_healthy
       config-service:
+        condition: service_healthy
+      gateway-service:
         condition: service_healthy
       ps-db:
         condition: service_started
@@ -117,10 +145,10 @@ services:
       options:
         max-size: 10m
         max-file: "3"
-#    expose:
-#      - "5432"
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
+#    ports:
+#      - "5432:5432"
     volumes:
       - ./.docker/ps-db/init:/docker-entrypoint-initdb.d/
     environment:
