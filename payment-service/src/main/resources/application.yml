@@ -11,3 +11,10 @@ eureka:
   client:
     service-url:
       defaultZone: ${DISCOVERY_URL:http://localhost:8761/eureka}
+
+
+logging:
+  enabled: true
+  packages:
+    - ru.erminson.ps.repository
+    - ru.erminson.ps.service

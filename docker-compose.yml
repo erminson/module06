@@ -68,7 +68,7 @@ services:
     build:
       context: .
       dockerfile: ./.docker/learning-center/Dockerfile
-    container_name: learning-app
+#    container_name: learning-app
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
@@ -89,7 +89,8 @@ services:
     environment:
       SERVER_PORT: 8080
       DB_URL: lc-postgres:5432/lc-db
-      PAYMENT_URL: http://payment-app:8080/ws
+#      PAYMENT_URL: http://payment-app:8080/ws
+      PAYMENT_URL: http://gateway-service:8080/payment/ws
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
 
@@ -98,7 +99,7 @@ services:
     build:
       context: .
       dockerfile: ./.docker/payment-service/Dockerfile
-    container_name: payment-app
+#    container_name: payment-app
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
