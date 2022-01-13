@@ -111,6 +111,8 @@ dependencies {
     }
 
     implementation project(':logging-starter')
+    implementation 'net.logstash.logback:logstash-logback-encoder'
+
 
     runtimeOnly 'org.postgresql:postgresql:42.3.1'
 

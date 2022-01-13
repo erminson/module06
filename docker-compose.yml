@@ -30,8 +30,8 @@ services:
       timeout: 5s
       retries: 2
     restart: always
-#    ports:
-#      - "8888:8080"
+    #    ports:
+    #      - "8888:8080"
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -63,20 +63,18 @@ services:
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
 
-  learning_app:
+  learning_app1:
     image: 'lc-app:0.0.1'
     build:
       context: .
       dockerfile: ./.docker/learning-center/Dockerfile
-#    container_name: learning-app
+    container_name: learning-app1
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
       timeout: 2s
       retries: 2
     restart: always
-#    ports:
-#      - "8093:8080"
     depends_on:
       discovery-service:
         condition: service_healthy
@@ -89,7 +87,35 @@ services:
     environment:
       SERVER_PORT: 8080
       DB_URL: lc-postgres:5432/lc-db
-#      PAYMENT_URL: http://payment-app:8080/ws
+      #      PAYMENT_URL: http://payment-app:8080/ws
+      PAYMENT_URL: http://gateway-service:8080/payment/ws
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+      CONFIG_URL: http://config-service:8080/
+
+  learning_app2:
+    image: 'lc-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/learning-center/Dockerfile
+    container_name: learning-app2
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 2s
+      retries: 2
+    restart: always
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      lc-db:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: lc-postgres:5432/lc-db
       PAYMENT_URL: http://gateway-service:8080/payment/ws
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
@@ -99,7 +125,7 @@ services:
     build:
       context: .
       dockerfile: ./.docker/payment-service/Dockerfile
-#    container_name: payment-app
+    container_name: payment-app
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
@@ -148,8 +174,8 @@ services:
         max-file: "3"
     expose:
       - "5432"
-#    ports:
-#      - "5432:5432"
+    #    ports:
+    #      - "5432:5432"
     volumes:
       - ./.docker/ps-db/init:/docker-entrypoint-initdb.d/
     environment:
