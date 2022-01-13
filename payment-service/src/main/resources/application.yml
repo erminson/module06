@@ -1,0 +1,20 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: payment-service
+  config:
+    import: optional:configserver:${CONFIG_URL:http://localhost:8888}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${DISCOVERY_URL:http://localhost:8761/eureka}
+
+
+logging:
+  enabled: true
+  packages:
+    - ru.erminson.ps.repository
+    - ru.erminson.ps.service

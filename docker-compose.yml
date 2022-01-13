@@ -1,0 +1,184 @@
+version: '2.4'
+
+services:
+  discovery-service:
+    image: 'ds-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/discovery-service/Dockerfile
+    container_name: discovery-app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    restart: always
+    ports:
+      - "8761:8080"
+    environment:
+      SERVER_PORT: 8080
+
+  config-service:
+    image: 'cs-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/config-service/Dockerfile
+    container_name: config-app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    restart: always
+    #    ports:
+    #      - "8888:8080"
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+
+  gateway-service:
+    image: 'gs-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/gateway-service/Dockerfile
+    container_name: gateway-app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+      CONFIG_URL: http://config-service:8080/
+
+  learning_app1:
+    image: 'lc-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/learning-center/Dockerfile
+    container_name: learning-app1
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 2s
+      retries: 2
+    restart: always
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      lc-db:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: lc-postgres:5432/lc-db
+      #      PAYMENT_URL: http://payment-app:8080/ws
+      PAYMENT_URL: http://gateway-service:8080/payment/ws
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+      CONFIG_URL: http://config-service:8080/
+
+  learning_app2:
+    image: 'lc-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/learning-center/Dockerfile
+    container_name: learning-app2
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 2s
+      retries: 2
+    restart: always
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      lc-db:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: lc-postgres:5432/lc-db
+      PAYMENT_URL: http://gateway-service:8080/payment/ws
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+      CONFIG_URL: http://config-service:8080/
+
+  payment_app:
+    image: 'ps-app:0.0.1'
+    build:
+      context: .
+      dockerfile: ./.docker/payment-service/Dockerfile
+    container_name: payment-app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 2s
+      retries: 2
+    #    expose:
+    #      - "8082"
+    restart: always
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      ps-db:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: ps-postgres:5432/ps-db
+      DISCOVERY_URL: http://discovery-app:8080/eureka/
+      CONFIG_URL: http://config-service:8080/
+
+  lc-db:
+    image: 'postgres:14.1-alpine3.15'
+    container_name: lc-postgres
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    expose:
+      - "5432"
+    volumes:
+      - ./.docker/lc-db/init:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=lc-db
+
+  ps-db:
+    image: 'postgres:14.1-alpine3.15'
+    container_name: ps-postgres
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    expose:
+      - "5432"
+    #    ports:
+    #      - "5432:5432"
+    volumes:
+      - ./.docker/ps-db/init:/docker-entrypoint-initdb.d/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ps-db

@@ -1,0 +1,9 @@
+SELECT ID,
+       STUDENT_ID,
+       COURSE_ID,
+       PRICE,
+       CREATED_AT,
+       PAYMENT_AT,
+       PAYMENT_ID
+FROM ORDERS
+WHERE STUDENT_ID = ?;

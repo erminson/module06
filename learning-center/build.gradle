@@ -8,12 +8,17 @@ plugins {
 group 'ru.erminson.lc'
 version '1.0-SNAPSHOT'
 
+configurations {
+    jaxb
+}
+
 repositories {
     mavenCentral()
 }
 
 ext {
     tomcatWebappPath = "/Users/erminson/apache-tomcat-10.0.11/webapps"
+    set('springCloudVersion', "2020.0.5")
 }
 
 bootWar {
@@ -32,24 +37,96 @@ task deployTomcat(type: Copy) {
 deployTomcat.dependsOn bootWar
 assemble.dependsOn deployTomcat
 
+task genJaxb {
+    ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
+    ext.classesDir = "${buildDir}/classes/jaxb"
+    ext.schema = "http://localhost:8082/ws/payment.wsdl"
+
+    outputs.dir classesDir
+
+    doLast() {
+        project.ant {
+            taskdef name: "xjc", classname: "com.sun.tools.xjc.XJCTask", classpath: configurations.jaxb.asPath
+            mkdir(dir: sourcesDir)
+            mkdir(dir: classesDir)
+
+            xjc(destdir: sourcesDir, schema: schema, package: "ru.erminson.lc.soap.model") {
+                arg(value: "-wsdl")
+                produces(dir: sourcesDir, includes: "**/*.java")
+            }
+
+            javac(destdir: classesDir, source: 11, target: 11, debug: true, debugLevel: "lines,vars,source",
+                    classpath: configurations.jaxb.asPath) {
+                src(path: sourcesDir)
+                include(name: "**/*.java")
+                include(name: "*.java")
+            }
+
+            copy(todir: classesDir) {
+                fileset(dir: sourcesDir, erroronmissingdir: false) {
+                    exclude(name: "**/*.java")
+                }
+            }
+        }
+    }
+}
+
+bootJar {
+    baseName 'gs-consuming-web-service'
+    version '0.0.1'
+}
+
+genJaxb.enabled = false
+
+gradle.taskGraph.whenReady {taskGraph ->
+    println "Found task graph: " + taskGraph
+    println "Found " + taskGraph.allTasks.size() + " tasks."
+    taskGraph.allTasks.forEach { task ->
+        println task
+        task.dependsOn.forEach { dep ->
+            println "  - " + dep
+        }
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation('org.springframework.boot:spring-boot-starter-web-services') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.ws:spring-ws-core'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
-    runtimeOnly 'com.h2database:h2:1.4.200'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage'
+    }
+
     implementation project(':logging-starter')
+    implementation 'net.logstash.logback:logstash-logback-encoder'
+
+
+    runtimeOnly 'org.postgresql:postgresql:42.3.1'
+
+    implementation 'org.glassfish.jaxb:jaxb-runtime'
+    implementation(files(genJaxb.classesDir).builtBy(genJaxb))
+    jaxb "com.sun.xml.bind:jaxb-xjc:2.1.7"
 
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+}
 
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage'
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
 

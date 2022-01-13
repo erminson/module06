@@ -1,8 +1,8 @@
-SELECT user.id,
+SELECT users.id,
        login,
        password,
        CREATED_AT,
        role.NAME
-FROM user
-         JOIN role ON user.ROLE_ID = role.ID
+FROM users
+         JOIN role ON users.ROLE_ID = role.ID
 WHERE LOGIN = ? AND PASSWORD = ?

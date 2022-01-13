@@ -1,0 +1,10 @@
+.gradle
+.idea
+gradle
+logs
+reports
+.gitignore
+*.gradle
+gradlew*
+PUBLIC.png
+startup.sh

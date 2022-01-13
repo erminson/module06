@@ -35,6 +35,7 @@ public class StudentController {
     public ResponseEntity<StudentResponse> addStudent(
             @Valid @RequestBody StudentRequest studentRequest) throws EntityHasAlreadyBeenCreated {
         Student student = studentService.add(studentRequest);
+
         return ResponseEntity.ok(new StudentResponse(student.getId(), student.getName()));
     }
 
@@ -58,11 +59,15 @@ public class StudentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable long id) throws EntityNotFoundException {
         studentService.deleteById(id);
+
         return ResponseEntity.ok("Student with id: " + id + " deleted with success");
     }
 
     @PutMapping("/{id}/topic/{topicId}")
-    public ResponseEntity<String> rate(@PathVariable long id, @PathVariable long topicId, @RequestBody TopicScoreRequest topicScoreRequest) {
+    public ResponseEntity<String> rate(
+            @PathVariable long id,
+            @PathVariable long topicId,
+            @RequestBody TopicScoreRequest topicScoreRequest) {
         recordBookService.rateTopic(topicId, topicScoreRequest.getScore());
 
         return ResponseEntity.ok("TopicScore updated");

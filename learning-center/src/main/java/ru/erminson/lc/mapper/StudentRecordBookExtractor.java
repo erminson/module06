@@ -15,18 +15,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StudentRecordBookExtractor implements ResultSetExtractor<Map<Student, RecordBook>> {
-    public static final String RECORD_BOOK_ID_COLUMN = "RECORD_BOOK_ID";
-    public static final String STUDENT_ID_COLUMN = "STUDENT_ID";
-    public static final String STUDENT_NAME_COLUMN = "STUDENT_NAME";
-    public static final String COURSE_ID_COLUMN = "COURSE_ID";
-    public static final String COURSE_TITLE_COLUMN = "COURSE_TITLE";
-    public static final String START_DATE_COLUMN = "START_DATE";
-    public static final String TOPIC_SCORE_ID_COLUMN = "TOPIC_SCORE_ID";
-    public static final String TOPIC_ID_COLUMN = "TOPIC_ID";
-    public static final String TOPIC_TITLE_COLUMN = "TOPIC_TITLE";
-    public static final String TOPIC_SCORE_COLUMN = "TOPIC_SCORE";
-    public static final String DURATION_IN_HOURS_COLUMN = "DURATION_IN_HOURS";
-    public static final String PRIORITY_COLUMN = "PRIORITY_HOURS";
+    public static final String RECORD_BOOK_ID_COLUMN = "record_book_id";
+    public static final String STUDENT_ID_COLUMN = "student_id";
+    public static final String STUDENT_NAME_COLUMN = "student_name";
+    public static final String COURSE_ID_COLUMN = "course_id";
+    public static final String COURSE_TITLE_COLUMN = "course_title";
+    public static final String START_DATE_COLUMN = "start_date";
+    public static final String TOPIC_SCORE_ID_COLUMN = "topic_score_id";
+    public static final String TOPIC_ID_COLUMN = "topic_id";
+    public static final String TOPIC_TITLE_COLUMN = "topic_title";
+    public static final String TOPIC_SCORE_COLUMN = "topic_score";
+    public static final String DURATION_IN_HOURS_COLUMN = "duration_in_hours";
+    public static final String PRIORITY_COLUMN = "priority_hours";
     
     @Override
     public Map<Student, RecordBook> extractData(ResultSet rs) throws SQLException, DataAccessException {

@@ -25,57 +25,6 @@ import java.util.*;
 @Slf4j
 @Repository
 public class RecordBookRepositoryJdbc implements RecordBookRepository {
-    private static final String INSERT_RECORD_BOOK_SQL =
-            "INSERT INTO RECORD_BOOK (STUDENT_ID, COURSE_ID, START_DATE)\n" +
-                    "VALUES (?, ?, ?);";
-
-    private static final String INSERT_TOPIC_SCORE_SQL =
-            "INSERT INTO TOPIC_SCORE (TOPIC_ID, SCORE)\n" +
-                    "VALUES (?, ?);";
-
-    private static final String INSERT_RECORD_BOOK_TOPIC_SCORE_SQL =
-            "INSERT INTO RECORD_BOOK_TOPIC_SCORE (RECORD_BOOK_ID, TOPIC_SCORE_ID)\n" +
-                    "VALUES (?, ?)";
-
-    private static final String GET_STUDENT_ID_SQL = "SELECT ID FROM STUDENT WHERE NAME = ?";
-    private static final String GET_COURSE_ID_SQL = "SELECT ID FROM COURSE WHERE TITLE = ?";
-
-    private static final String GET_ALL_STUDENTS_ON_COURSES =
-            String.format(
-                    "SELECT\n" +
-                            "S.ID   %s,\n" +
-                            "S.NAME %s\n" +
-                            "FROM RECORD_BOOK RB\n" +
-                            "JOIN STUDENT S ON RB.STUDENT_ID = S.ID",
-                    StudentRecordBookExtractor.STUDENT_ID_COLUMN, StudentRecordBookExtractor.STUDENT_NAME_COLUMN
-            );
-
-    private static final String GET_RECORD_BOOK_ID_BY_STUDENT_ID =
-            "SELECT ID FROM RECORD_BOOK WHERE STUDENT_ID = ?";
-
-    private static final String UPDATE_TOPIC_SCORE_SQL =
-            "UPDATE TOPIC_SCORE\n" +
-                    "SET score = ?\n" +
-                    "WHERE id = ?;";
-
-    private static final String GET_RECORD_BOOK_ID =
-            "SELECT ID\n" +
-                    "FROM RECORD_BOOK\n" +
-                    "WHERE STUDENT_ID = ?;";
-
-    private static final String DELETE_TOPIC_SCORES_SQL =
-            "DELETE\n" +
-                    "FROM TOPIC_SCORE\n" +
-                    "WHERE ID IN (SELECT TS.ID\n" +
-                    "    FROM TOPIC_SCORE TS\n" +
-                    "    JOIN RECORD_BOOK_TOPIC_SCORE RBTS ON RBTS.TOPIC_SCORE_ID = TS.ID\n" +
-                    "    WHERE RBTS.RECORD_BOOK_ID = ?);";
-
-    private static final String DELETE_RECORD_BOOK_BY_ID_SQL =
-            "DELETE\n" +
-                    "FROM RECORD_BOOK\n" +
-                    "WHERE ID = ?;";
-
     private final JdbcTemplate jdbcTemplate;
     private final SqlFactory sqlFactory;
 
@@ -85,6 +34,7 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     }
 
     @Override
+    @Transactional
     public boolean addStudentWithRecordBook(Student student, RecordBook recordBook) {
         return enrollStudentOnCourse(student.getId(), recordBook);
     }
@@ -94,8 +44,9 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     public boolean enrollStudentOnCourse(long studentId, RecordBook recordBook) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
+            String sql = sqlFactory.getSqlQuery("recordbook/insert-recordbook.sql");
             jdbcTemplate.update(con -> {
-                PreparedStatement ps = con.prepareStatement(INSERT_RECORD_BOOK_SQL, new String[]{"ID"});
+                PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
                 ps.setLong(1, studentId);
                 ps.setLong(2, recordBook.getCourseId());
                 ps.setDate(3, Date.valueOf(recordBook.getStartDate()));
@@ -108,7 +59,8 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
 
         Long recordBookId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         List<Long> topicScoreIds = insertTopicScoresIntoDB(recordBook.getTopics());
-        jdbcTemplate.batchUpdate(INSERT_RECORD_BOOK_TOPIC_SCORE_SQL, new BatchPreparedStatementSetter() {
+        String sql = sqlFactory.getSqlQuery("recordbook-topicscore/insert-rb-ts.sql");
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Long topicScoreId = topicScoreIds.get(i);
@@ -128,9 +80,10 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     private List<Long> insertTopicScoresIntoDB(List<TopicScore> topicScores) {
         List<Long> ids = new ArrayList<>();
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        for (TopicScore topicScore : topicScores) {
+        String sql = sqlFactory.getSqlQuery("topicscore/insert-topicscore.sql");
+        for (TopicScore topicScore : topicScores) { // TODO: fix it
             jdbcTemplate.update(con -> {
-                PreparedStatement ps = con.prepareStatement(INSERT_TOPIC_SCORE_SQL, new String[]{"ID"});
+                PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
                 ps.setLong(1, topicScore.getTopicId());
                 ps.setInt(2, topicScore.getScore());
 
@@ -150,7 +103,11 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
 
     @Override
     public boolean rateTopic(long topicScoreId, int score) {
-        int updatedCount = jdbcTemplate.update(UPDATE_TOPIC_SCORE_SQL, score, topicScoreId);
+        int updatedCount = jdbcTemplate.update(
+                sqlFactory.getSqlQuery("topicscore/update-topicscore.sql"),
+                score,
+                topicScoreId
+        );
         return updatedCount > 0;
     }
 
@@ -198,7 +155,7 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     @Override
     public boolean isStudentOnCourse(Student student) {
         List<Long> ids = jdbcTemplate.query(
-                GET_RECORD_BOOK_ID_BY_STUDENT_ID,
+                sqlFactory.getSqlQuery("recordbook/select-recordbook-row-by-student-id.sql"),
                 (rs, rowNum) -> rs.getLong(1),
                 student.getId());
 
@@ -210,21 +167,32 @@ public class RecordBookRepositoryJdbc implements RecordBookRepository {
     public boolean removeStudentFromCourse(Student student) {
         Long recordBookId;
         try {
-            recordBookId = jdbcTemplate.queryForObject(GET_RECORD_BOOK_ID, Long.class, student.getId());
+            recordBookId = jdbcTemplate.queryForObject(
+                    sqlFactory.getSqlQuery("recordbook/select-recordbook-id.sql"),
+                    Long.class,
+                    student.getId()
+            );
         } catch (EmptyResultDataAccessException e) {
             log.error(e.getMessage());
             return false;
         }
 
-        int deletedTopicsNumber = jdbcTemplate.update(DELETE_TOPIC_SCORES_SQL, recordBookId);
-        int deletedRecordBooksNumber = jdbcTemplate.update(DELETE_RECORD_BOOK_BY_ID_SQL, recordBookId);
+        int deletedTopicsNumber = jdbcTemplate.update(
+                sqlFactory.getSqlQuery("topicscore/delete-topicscore.sql"),
+                recordBookId
+        );
+        int deletedRecordBooksNumber = jdbcTemplate.update(
+                sqlFactory.getSqlQuery("recordbook/delete-recordbook-by-id.sql"),
+                recordBookId
+        );
 
         return deletedTopicsNumber > 0 || deletedRecordBooksNumber > 0;
     }
 
     @Override
     public List<Student> getAllStudents() {
-        return jdbcTemplate.query(GET_ALL_STUDENTS_ON_COURSES, (rs, rowNum) -> {
+        String sql = sqlFactory.getSqlQuery("recordbook/select-all-student-on-courses.sql");
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Student student = new Student();
             student.setId(rs.getLong(StudentRecordBookExtractor.STUDENT_ID_COLUMN));
             student.setName(rs.getString(StudentRecordBookExtractor.STUDENT_NAME_COLUMN));
