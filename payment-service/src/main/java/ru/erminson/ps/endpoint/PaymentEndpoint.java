@@ -1,5 +1,6 @@
 package ru.erminson.ps.endpoint;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -13,6 +14,7 @@ import ru.erminson.ps.soap.payment.PaymentDetails;
 import java.time.format.DateTimeFormatter;
 
 @Endpoint
+@Slf4j
 public class PaymentEndpoint {
     private static final String NAMESPACE_URI = "http://www.erminson.ru/ps/soap/payment";
 
@@ -26,8 +28,10 @@ public class PaymentEndpoint {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "GetPaymentDetailsRequest")
     @ResponsePayload
     public GetPaymentDetailsResponse getPaymentDetails(@RequestPayload GetPaymentDetailsRequest request) {
+        log.info("Get Payment Details Request: {}", request);
         paymentService.save(mapRequestToEntity(request));
         PaymentEntity paymentEntity = paymentService.findByOrderId(request.getOrderId());
+        log.info("Get Payment Details Payment Entity: {}", paymentEntity);
         return mapEntityToResponse(paymentEntity);
     }
 

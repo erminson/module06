@@ -26,6 +26,7 @@
 
     <springProperty name="LOGBACK_URL" source="logback.destination.url"/>
     <springProperty name="LOGBACK_PORT" source="logback.destination.port"/>
+    <springProperty scope="context" name="application_name" source="spring.application.name"/>
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${LOGBACK_URL}:${LOGBACK_PORT}</destination>
@@ -33,9 +34,15 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
+<!--        <appender-ref ref="STDOUT" />-->
         <appender-ref ref="FILE" />
         <appender-ref ref="LOGSTASH" />
+        <appender-ref ref="CONSOLE"/>
     </root>
+
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="com.optimagrowth" level="DEBUG"/>
 </configuration>

@@ -57,13 +57,19 @@ compileJava.dependsOn genJaxb
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation('org.springframework.boot:spring-boot-starter-web-services') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage'
+    }
 
     implementation 'wsdl4j:wsdl4j'
     implementation 'javax.xml.bind:jaxb-api'
@@ -71,16 +77,13 @@ dependencies {
 
     jaxb("org.glassfish.jaxb:jaxb-xjc")
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage'
-    }
-
     implementation project(':logging-starter')
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.0.1'
 
     runtimeOnly 'org.postgresql:postgresql:42.3.1'
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 }
 
 dependencyManagement {

@@ -1,5 +1,6 @@
 package ru.erminson.ps.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Repository
+@Slf4j
 public class PaymentRepositoryImpl implements PaymentRepository {
     private final JdbcTemplate jdbcTemplate;
 
@@ -23,22 +25,28 @@ public class PaymentRepositoryImpl implements PaymentRepository {
 
     @Override
     public boolean save(PaymentEntity paymentEntity) {
+        log.info("Save: {}", paymentEntity);
         String sql = "INSERT INTO payment (order_id, price) VALUES (?, ?);";
         try {
             jdbcTemplate.update(sql, paymentEntity.getOrderId(), paymentEntity.getPrice());
+            log.info("Save: success");
             return true;
         } catch (DataIntegrityViolationException e) {
+            log.info("Save: {}", e.toString());
             return false;
         }
     }
 
     @Override
     public Optional<PaymentEntity> findByOrderId(long orderId) {
+        log.info("Find by order id: {}", orderId);
         PaymentEntity paymentEntity = null;
         String sql = "SELECT id, order_id, price, payment_at FROM payment WHERE order_id = ?;";
         try {
             paymentEntity = jdbcTemplate.queryForObject(sql, new PaymentEntityRowMapper(), orderId);
+            log.info("Find by order id: success");
         } catch (EmptyResultDataAccessException e) {
+            log.info("Find by order id: {}", e.toString());
         }
 
         return Optional.ofNullable(paymentEntity);

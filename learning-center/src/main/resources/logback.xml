@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+
+<configuration scan="true">
     # Console appender
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -24,21 +25,23 @@
         </encoder>
     </appender>
 
-<!--    <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">-->
-<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />-->
-<!--    </appender>-->
 
-<!--    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-<!--        <destination>127.0.0.1:5000</destination>-->
+    <springProperty name="LOGBACK_URL" source="logback.destination.url"/>
+    <springProperty name="LOGBACK_PORT" source="logback.destination.port"/>
+    <springProperty scope="context" name="application_name" source="spring.application.name"/>
 
-<!--        &lt;!&ndash; encoder is required &ndash;&gt;-->
-<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />-->
-<!--    </appender>-->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGBACK_URL}:${LOGBACK_PORT}</destination>
+        <keepAliveDuration>5 minutes</keepAliveDuration>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
+<!--        <appender-ref ref="STDOUT" />-->
         <appender-ref ref="FILE" />
-<!--        <appender-ref ref="jsonConsoleAppender"/>-->
-<!--        <appender-ref ref="LOGSTASH" />-->
+        <appender-ref ref="LOGSTASH" />
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

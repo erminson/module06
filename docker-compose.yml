@@ -17,6 +17,8 @@ services:
       - "8761:8080"
     environment:
       SERVER_PORT: 8080
+    networks:
+      - lc-net
 
   config-service:
     image: 'cs-app:0.0.1'
@@ -38,6 +40,8 @@ services:
     environment:
       SERVER_PORT: 8080
       DISCOVERY_URL: http://discovery-app:8080/eureka/
+    networks:
+      - lc-net
 
   gateway-service:
     image: 'gs-app:0.0.1'
@@ -62,6 +66,9 @@ services:
       SERVER_PORT: 8080
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - lc-net
 
   learning_app1:
     image: 'lc-app:0.0.1'
@@ -87,38 +94,45 @@ services:
     environment:
       SERVER_PORT: 8080
       DB_URL: lc-postgres:5432/lc-db
-      #      PAYMENT_URL: http://payment-app:8080/ws
       PAYMENT_URL: http://gateway-service:8080/payment/ws
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - lc-net
+      - elk
 
-  learning_app2:
-    image: 'lc-app:0.0.1'
-    build:
-      context: .
-      dockerfile: ./.docker/learning-center/Dockerfile
-    container_name: learning-app2
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 10s
-      timeout: 2s
-      retries: 2
-    restart: always
-    depends_on:
-      discovery-service:
-        condition: service_healthy
-      config-service:
-        condition: service_healthy
-      gateway-service:
-        condition: service_healthy
-      lc-db:
-        condition: service_started
-    environment:
-      SERVER_PORT: 8080
-      DB_URL: lc-postgres:5432/lc-db
-      PAYMENT_URL: http://gateway-service:8080/payment/ws
-      DISCOVERY_URL: http://discovery-app:8080/eureka/
-      CONFIG_URL: http://config-service:8080/
+#  learning_app2:
+#    image: 'lc-app:0.0.1'
+#    build:
+#      context: .
+#      dockerfile: ./.docker/learning-center/Dockerfile
+#    container_name: learning-app2
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+#      interval: 10s
+#      timeout: 2s
+#      retries: 2
+#    restart: always
+#    depends_on:
+#      discovery-service:
+#        condition: service_healthy
+#      config-service:
+#        condition: service_healthy
+#      gateway-service:
+#        condition: service_healthy
+#      lc-db:
+#        condition: service_started
+#    environment:
+#      SERVER_PORT: 8080
+#      DB_URL: lc-postgres:5432/lc-db
+#      PAYMENT_URL: http://gateway-service:8080/payment/ws
+#      DISCOVERY_URL: http://discovery-app:8080/eureka/
+#      CONFIG_URL: http://config-service:8080/
+#      LOGSTASH_URL: http://docker-elk_logstash:5000
+#    networks:
+#      - lc-net
+#      - elk
 
   payment_app:
     image: 'ps-app:0.0.1'
@@ -148,6 +162,10 @@ services:
       DB_URL: ps-postgres:5432/ps-db
       DISCOVERY_URL: http://discovery-app:8080/eureka/
       CONFIG_URL: http://config-service:8080/
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - lc-net
+      - elk
 
   lc-db:
     image: 'postgres:14.1-alpine3.15'
@@ -164,6 +182,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=lc-db
+    networks:
+      - lc-net
 
   ps-db:
     image: 'postgres:14.1-alpine3.15'
@@ -174,11 +194,19 @@ services:
         max-file: "3"
     expose:
       - "5432"
-    #    ports:
-    #      - "5432:5432"
     volumes:
       - ./.docker/ps-db/init:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ps-db
+    networks:
+      - lc-net
+
+networks:
+  lc-net:
+    driver: bridge
+    name: lc-net
+  elk:
+    external: true
+    name: docker-elk_elk
